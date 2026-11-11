@@ -21,7 +21,7 @@ export function makeFrame(overrides: Partial<GridFrame> = {}): GridFrame {
     packed_material: 0,
   }));
   return {
-    schema_version: 8,
+    schema_version: 9,
     mode: "live",
     run_id: "00000000-0000-4000-8000-000000000001",
     created_at: "2026-11-08T12:00:00Z",
@@ -140,7 +140,7 @@ export function makeHistory(
 ): HistoryFrame {
   const live = makeFrame();
   return {
-    schema_version: 8,
+    schema_version: 9,
     mode: "history",
     run_id: live.run_id,
     tick,
@@ -190,6 +190,7 @@ export function makeOrganism(
     material_capacity: 20,
     retired_material: 0,
     lifespan: null,
+    parent_ids: [],
     ...overrides,
   };
 }

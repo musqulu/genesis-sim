@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-RULES_VERSION = "m11-rules-1"
+RULES_VERSION = "m12-rules-1"
 # Rules identity hashed into each state schema; old schemas keep their original value so
 # that runs recorded under them still verify.
 RULES_BY_SCHEMA = {
@@ -12,7 +12,8 @@ RULES_BY_SCHEMA = {
     7: "m08-rules-1",
     8: "m09-rules-1",
     9: "m10-rules-1",
-    10: RULES_VERSION,
+    10: "m11-rules-1",
+    11: RULES_VERSION,
 }
 # Lifecycle/material fields introduced with state schema 5 (M05). They are omitted from
 # schema-4 serializations so M04 runs keep byte-identical hashes and stored records.
@@ -56,6 +57,16 @@ M09_LIFE_FIELDS = (
 )
 # Starting tendencies introduced with state schema 9 (M10).
 M10_LIFE_FIELDS = ("tendency_mode",)
+# Agent-initiated reproduction introduced with state schema 11 (M12).
+M12_LIFE_FIELDS = (
+    "reproduction_enabled",
+    "reproduction_fee",
+    "reproduction_min_endowment",
+    "reproduction_retain",
+    "reproduction_cooldown",
+    "inherit_probability_percent",
+    "inherit_perturbation",
+)
 # Bounded reflection introduced with state schema 10 (M11).
 M11_LIFE_FIELDS = (
     "reflection_enabled",
@@ -183,6 +194,14 @@ class LifeConfig:
     reflection_fee: int = 2  # energy per accepted reflection response, plus storage
     reflection_max: int = 2  # stored reflections per response at most
     reflection_context_max: int = 16  # own records shown to a reflection request
+    # M12 reproduction (schema 11): a parent's validated choice, never a population rule.
+    reproduction_enabled: bool = True  # False keeps a fixture's earlier behavior
+    reproduction_fee: int = 10  # energy dissipated per birth
+    reproduction_min_endowment: int = 20  # energy the child starts with, at least
+    reproduction_retain: int = 10  # energy the parent must keep after fee + endowment
+    reproduction_cooldown: int = 20  # ticks between a parent's births
+    inherit_probability_percent: int = 50  # chance each tendency is inherited (mask)
+    inherit_perturbation: int = 10  # inherited values move by a uniform -n..+n, clipped
 
     def __post_init__(self) -> None:
         _check_int("energy_capacity", self.energy_capacity, 1, 10_000)
@@ -230,6 +249,14 @@ class LifeConfig:
         _check_int("reflection_fee", self.reflection_fee, 0, 10_000)
         _check_int("reflection_max", self.reflection_max, 1, 8)
         _check_int("reflection_context_max", self.reflection_context_max, 1, 64)
+        if type(self.reproduction_enabled) is not bool:
+            raise ValueError("reproduction_enabled must be a boolean")
+        _check_int("reproduction_fee", self.reproduction_fee, 0, 10_000)
+        _check_int("reproduction_min_endowment", self.reproduction_min_endowment, 1, 10_000)
+        _check_int("reproduction_retain", self.reproduction_retain, 0, 10_000)
+        _check_int("reproduction_cooldown", self.reproduction_cooldown, 1, 1_000_000)
+        _check_int("inherit_probability_percent", self.inherit_probability_percent, 0, 100)
+        _check_int("inherit_perturbation", self.inherit_perturbation, 0, TENDENCY_MAX)
         if self.tendency_mode not in TENDENCY_MODES:
             raise ValueError("tendency_mode must be 'seeded', 'neutral' or 'off'")
         if not isinstance(self.provider, str) or not (
@@ -248,7 +275,7 @@ class LifeConfig:
         if len({(s.x, s.y) for s in self.seeds}) != len(self.seeds):
             raise ValueError("seed organisms may not share a cell")
 
-    def to_dict(self, schema: int = 10) -> dict:
+    def to_dict(self, schema: int = 11) -> dict:
         data = {
             "energy_capacity": self.energy_capacity,
             "start_energy": self.start_energy,
@@ -271,6 +298,8 @@ class LifeConfig:
             data.update({name: getattr(self, name) for name in M10_LIFE_FIELDS})
         if schema >= 10:
             data.update({name: getattr(self, name) for name in M11_LIFE_FIELDS})
+        if schema >= 11:
+            data.update({name: getattr(self, name) for name in M12_LIFE_FIELDS})
         return data
 
     @classmethod
@@ -304,13 +333,25 @@ _NO_MEMORY = {
     "exchange_enabled": False,
     "tendency_mode": "off",
     "reflection_enabled": False,
+    "reproduction_enabled": False,
 }
 # M08 fixtures keep their behavior under M09 rules: memory, but no exchange actions.
-_NO_EXCHANGE = {"exchange_enabled": False, "tendency_mode": "off", "reflection_enabled": False}
+_NO_EXCHANGE = {
+    "exchange_enabled": False,
+    "tendency_mode": "off",
+    "reflection_enabled": False,
+    "reproduction_enabled": False,
+}
 # M09 fixtures keep their behavior under M10 rules: exchange, but no tendencies.
-_NO_TENDENCIES = {"tendency_mode": "off", "reflection_enabled": False}
+_NO_TENDENCIES = {
+    "tendency_mode": "off",
+    "reflection_enabled": False,
+    "reproduction_enabled": False,
+}
 # M10 fixtures keep their behavior under M11 rules: tendencies, but no reflection.
-_NO_REFLECTION = {"reflection_enabled": False}
+_NO_REFLECTION = {"reflection_enabled": False, "reproduction_enabled": False}
+# M11 fixtures keep their behavior under M12 rules: reflection, but no reproduction.
+_NO_REPRODUCTION = {"reproduction_enabled": False}
 
 FIXTURES: dict[str, Fixture] = {
     "zero_inflow": Fixture({"inflow_amount": 0}, LifeConfig(), "No energy inflow, no organisms"),
@@ -460,17 +501,42 @@ FIXTURES: dict[str, Fixture] = {
     # M11: reflection opportunities from accumulated salient records (scripted replies).
     "reflection_probe": Fixture(
         {},
-        LifeConfig(**_EVERY_TICK, start_energy=100, seeds=(SeedOrganism(16, 16, "walk_reflect"),)),
+        LifeConfig(
+            **_EVERY_TICK,
+            **_NO_REPRODUCTION,
+            start_energy=100,
+            seeds=(SeedOrganism(16, 16, "walk_reflect"),),
+        ),
         "One test organism walking a square; once 8 new salient records exist (and every "
         "20 ticks after), its decision becomes a reflection citing two of its own records",
     ),
     "reflection_invalid": Fixture(
         {},
         LifeConfig(
-            **_EVERY_TICK, start_energy=100, seeds=(SeedOrganism(16, 16, "walk_reflect_invalid"),)
+            **_EVERY_TICK,
+            **_NO_REPRODUCTION,
+            start_energy=100,
+            seeds=(SeedOrganism(16, 16, "walk_reflect_invalid"),),
         ),
         "Like reflection_probe, but every reflection cites a memory id it never had: "
         "rejected, nothing stored, the opportunity and its cooldown still used",
+    ),
+    # M12: a scripted parent's valid and invalid birth attempts (diagnostic only).
+    "birth_pair": Fixture(
+        {"inflow_amount": 0},
+        LifeConfig(
+            **_EVERY_TICK,
+            memory_enabled=False,
+            exchange_enabled=False,
+            reflection_enabled=False,
+            start_energy=100,
+            lifespan_min=24,
+            lifespan_max=60,
+            seeds=(SeedOrganism(12, 12, "reproducer", (80, 20, 60, 40, 70, 30)),),
+        ),
+        "One scripted parent: a birth east (endowment 40), then attempts rejected for "
+        "cooldown, a too-small endowment, an occupied cell and too little energy; the child "
+        "runs the same script and is too poor to reproduce. No energy inflow",
     ),
 }
 

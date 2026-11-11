@@ -131,4 +131,13 @@ def _action_rules(world: World) -> tuple[str, ...]:
             f"{life.message_fee_per_64_bytes} per started 64 bytes energy; delivered next tick; "
             f"its inbox holds at most {life.inbox_capacity} messages",
         ]
+    if world.schema >= 11 and life.reproduction_enabled:
+        rules.append(
+            f"reproduce(direction, endowment energy at least {life.reproduction_min_endowment}, "
+            f"optional material): a new organism is born in that adjacent empty cell with the "
+            f"endowment as its energy; costs a fee of {life.reproduction_fee} plus the "
+            f"endowment, you must keep at least {life.reproduction_retain} energy, and at most "
+            f"once every {life.reproduction_cooldown} ticks. The new organism lives its own "
+            "life; it starts with some of your tendencies, varied, and none of your memories"
+        )
     return tuple(rules)

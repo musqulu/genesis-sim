@@ -19,3 +19,4 @@ export const ORGANISM_COLOR = "#ff8fd1";
 export const LOCAL_VIEW_COLOR = "rgba(255, 143, 209, 0.28)";
 export const TRANSFER_COLOR = "#ffd166"; // a gift of energy or material (solid arrow)
 export const MESSAGE_COLOR = "#7cc4ff"; // a message (dashed arrow)
+export const BIRTH_COLOR = "#ff8fd1"; // a birth: parent to child (dotted arrow)

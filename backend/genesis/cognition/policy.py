@@ -65,7 +65,15 @@ class _Communicate(_Strict):
     text: str = Field(min_length=1, max_length=4096)  # bytes are checked by the engine
 
 
+class _Reproduce(_Strict):
+    action: Literal["reproduce"]
+    direction: Literal["north", "east", "south", "west"]
+    endowment: int
+    material: int | None = None
+
+
 _MODELS = {
+    "reproduce": _Reproduce,
     "wait": _Wait,
     "move": _Move,
     "extract": _Extract,
@@ -140,5 +148,7 @@ def parse(raw: str, life: LifeConfig, available: tuple[str, ...]) -> ParseResult
         amount=amount,
         target=getattr(model, "target", None),
         text=getattr(model, "text", None),
+        endowment=getattr(model, "endowment", None),
+        material=getattr(model, "material", None),
     )
     return ParseResult(proposal, model.explanation, FENCE_NOTE if text is not raw else None)

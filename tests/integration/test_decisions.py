@@ -321,7 +321,7 @@ def test_decision_inspector_api_shows_input_raw_parse_and_outcome(tmp_path):
     with TestClient(create_app(tmp_path / "api.sqlite3", dev_fixtures=True)) as client:
         client.post("/api/runs", json={"seed": 42, "fixture": "recorded_invalid"})
         frame = client.post("/api/control", json={"command": "step", "command_id": cid()}).json()
-        assert frame["schema_version"] == 8 and frame["provider"]["kind"] == "recorded"
+        assert frame["schema_version"] == 9 and frame["provider"]["kind"] == "recorded"
         assert frame["provider"]["capabilities"]["structured_output"] == "none"
         (decision,) = client.get("/api/decisions").json()["decisions"]
         assert decision["parse_status"] == "malformed_json" and decision["outcome"] == "unparsed"

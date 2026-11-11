@@ -1,6 +1,7 @@
 import {
   CHANGED_COLOR,
   LOCAL_VIEW_COLOR,
+  BIRTH_COLOR,
   MATERIAL_COLOR,
   MESSAGE_COLOR,
   ORGANISM_COLOR,
@@ -57,6 +58,10 @@ export default function Legend({ energyCap, cellCount }: Props) {
       <span className="legend-item">
         <i className="legend-swatch" style={{ background: MESSAGE_COLOR }} />
         Message (dashed arrow)
+      </span>
+      <span className="legend-item">
+        <i className="legend-swatch" style={{ background: BIRTH_COLOR }} />
+        Birth (dotted arrow)
       </span>
       <span className="grid-cell-count">
         {cellCount.toLocaleString("en-US")} cells

@@ -3,6 +3,7 @@ import type { Cell, Interaction, WorldView } from "../api";
 import {
   CHANGED_COLOR,
   LOCAL_VIEW_COLOR,
+  BIRTH_COLOR,
   MATERIAL_COLOR,
   MESSAGE_COLOR,
   ORGANISM_COLOR,
@@ -149,9 +150,19 @@ export default function CanvasGrid({
         ctx.save();
         ctx.globalAlpha = alpha;
         ctx.strokeStyle = ctx.fillStyle =
-          line.kind === "transfer" ? TRANSFER_COLOR : MESSAGE_COLOR;
+          line.kind === "transfer"
+            ? TRANSFER_COLOR
+            : line.kind === "reproduce"
+              ? BIRTH_COLOR
+              : MESSAGE_COLOR;
         ctx.lineWidth = Math.max(2, Math.min(cw, ch) * 0.14);
-        ctx.setLineDash(line.kind === "transfer" ? [] : [4, 3]);
+        ctx.setLineDash(
+          line.kind === "transfer"
+            ? []
+            : line.kind === "reproduce"
+              ? [1, 3]
+              : [4, 3],
+        );
         ctx.beginPath();
         ctx.moveTo(ax, ay);
         ctx.lineTo(bx, by);

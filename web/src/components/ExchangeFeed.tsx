@@ -18,7 +18,13 @@ export default function ExchangeFeed({ exchanges }: Props) {
         >
           <span className="exchange-tick">t{e.tick}</span>{" "}
           <strong>{e.from_id}</strong> → <strong>{e.to_id}</strong>
-          {e.kind === "transfer" ? <> gave {e.detail}</> : <>: “{e.detail}”</>}
+          {e.kind === "transfer" ? (
+            <> gave {e.detail}</>
+          ) : e.kind === "reproduce" ? (
+            <> {e.detail}</>
+          ) : (
+            <>: “{e.detail}”</>
+          )}
         </li>
       ))}
     </ol>

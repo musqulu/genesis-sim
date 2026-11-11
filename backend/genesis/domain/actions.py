@@ -10,8 +10,9 @@ ACTIONS_BY_SCHEMA = {
     6: ("wait", "move", "extract", "modify"),
     7: ("wait", "move", "extract", "modify"),
     8: ("wait", "move", "extract", "modify", "transfer", "communicate"),
+    11: ("wait", "move", "extract", "modify", "transfer", "communicate", "reproduce"),
 }
-ACTIONS = ACTIONS_BY_SCHEMA[8]
+ACTIONS = ACTIONS_BY_SCHEMA[11]
 RESOURCES = ("energy", "material")
 MODIFY_MODES = ("pack", "unpack")
 
@@ -28,6 +29,8 @@ ACTOR_NOT_ALIVE = "actor_not_alive"
 NOT_ADJACENT = "not_adjacent"  # the target is not a living organism next to the actor
 INBOX_FULL = "inbox_full"
 MESSAGE_TOO_LONG = "message_too_long"
+COOLDOWN = "cooldown"  # reproduction: too soon after its last birth
+ENDOWMENT_TOO_SMALL = "endowment_too_small"
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,10 +64,21 @@ class Proposal:
     amount: Any = None  # extract / modify / transfer: positive integer
     target: Any = None  # transfer / communicate: an organism id
     text: Any = None  # communicate: the message
+    endowment: Any = None  # reproduce: energy given to the child
+    material: Any = None  # reproduce: optional carried material given to the child
 
     def to_dict(self) -> dict:
         data = {"action": self.action}
-        for name in ("direction", "resource", "mode", "amount", "target", "text"):
+        for name in (
+            "direction",
+            "resource",
+            "mode",
+            "amount",
+            "target",
+            "text",
+            "endowment",
+            "material",
+        ):
             value = getattr(self, name)
             if value is not None:
                 data[name] = value

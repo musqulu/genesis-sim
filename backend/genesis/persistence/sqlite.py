@@ -34,7 +34,7 @@ from genesis.persistence.replay import (
 )
 
 SCHEMA_VERSION = 7  # database layout (PRAGMA user_version)
-STATE_SCHEMA = 10  # state/hash schema for newly created runs
+STATE_SCHEMA = 11  # state/hash schema for newly created runs
 MANIFEST_VERSION = 3
 SCHEMA_SQL = (Path(__file__).with_name("schema.sql")).read_text()
 
@@ -43,6 +43,12 @@ SCHEMA_SQL = (Path(__file__).with_name("schema.sql")).read_text()
 _WAL_FIXED = ((3, 51, 3), (3, 50, 7), (3, 44, 6))
 
 log = logging.getLogger("genesis.store")
+
+
+def _without_lifespan(record: dict) -> dict:
+    """A born organism's record as shown to the observer: its sampled lifespan stays hidden
+    here (the organism view reveals it only after death)."""
+    return {**record, "lifespan": None}
 
 
 def interaction(actor: str, summary: dict) -> dict:
@@ -57,6 +63,8 @@ def interaction(actor: str, summary: dict) -> dict:
         "to_y": summary["to_y"],
         "detail": f"{summary['amount']} {summary['resource']}"
         if summary["action"] == "transfer"
+        else f"born, endowment {summary['endowment']} energy"
+        if summary["action"] == "reproduce"
         else summary["text"][:80],
     }
 
@@ -1057,7 +1065,12 @@ class SqliteStore:
         event = self._event_row(row)
         event["payload"] = json.loads(row[8])
         event["organism_changes"] = [
-            {"organism_id": o, "field": f, "before": json.loads(b), "after": json.loads(a)}
+            {
+                "organism_id": o,
+                "field": f,
+                "before": json.loads(b),
+                "after": _without_lifespan(json.loads(a)) if f == "record" else json.loads(a),
+            }
             for o, f, b, a in organism_changes
         ]
         event["changes"] = [
@@ -1132,6 +1145,7 @@ class SqliteStore:
                     "messages_received": 0,
                     "material_packed": 0,
                     "material_unpacked": 0,
+                    "children": 0,
                 },
             )
 
@@ -1161,6 +1175,8 @@ class SqliteStore:
             elif action == "communicate":
                 a["messages_sent"] += 1
                 entry(s["target"])["messages_received"] += 1
+            elif action == "reproduce":
+                a["children"] += 1
         for a in stats.values():
             a["cells_visited"] = len(a.pop("cells"))
         return stats
@@ -1171,7 +1187,8 @@ class SqliteStore:
             rows = db.execute(
                 "SELECT actor_id, summary_json FROM events WHERE run_id = ? AND tick = ? "
                 "AND type = 'action_accepted' AND rule_id IN "
-                "('action.transfer.v1', 'action.communicate.v1') ORDER BY sequence",
+                "('action.transfer.v1', 'action.communicate.v1', 'action.reproduce.v1') "
+                "ORDER BY sequence",
                 (run_id, tick),
             ).fetchall()
         return [interaction(actor, json.loads(summary)) for actor, summary in rows]

@@ -188,6 +188,21 @@ def reflect_cite_unknown(context: dict) -> dict:
     }
 
 
+REPRODUCER = {
+    1: Proposal("reproduce", direction="east", endowment=40),  # accepted: a child east
+    2: Proposal("reproduce", direction="south", endowment=40),  # rejected: cooldown
+    3: Proposal("reproduce", direction="north", endowment=5),  # rejected: endowment_too_small
+    21: Proposal("reproduce", direction="east", endowment=40),  # rejected: occupied (child)
+    22: Proposal("reproduce", direction="north", endowment=40),  # rejected: insufficient_energy
+}
+
+
+def reproducer(context: dict) -> Proposal:
+    """birth_pair fixture: a fixed script by age; its child runs the same script and is
+    too poor to reproduce (40 energy < fee 10 + 40 + keep 10). Scripted, not adaptive."""
+    return REPRODUCER.get(context["observation"]["age"], Proposal("wait"))
+
+
 # Scripted reflection replies (M11), by fixture policy name; others reply with none.
 REFLECT_POLICIES: dict[str, Callable[[dict], dict]] = {
     "walk_reflect": reflect_cite_two,
@@ -195,6 +210,7 @@ REFLECT_POLICIES: dict[str, Callable[[dict], dict]] = {
 }
 
 CONTEXT_POLICIES: dict[str, Callable[[dict], Proposal]] = {
+    "reproducer": reproducer,
     "walk_reflect": walk_square,
     "walk_reflect_invalid": walk_square,
     "tendency_probe": tendency_probe,

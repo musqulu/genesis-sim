@@ -76,6 +76,7 @@ class OrganismView(StrictRecord):
     material_capacity: int
     retired_material: int
     lifespan: int | None
+    parent_ids: tuple[str, ...]  # v9: empty for seed organisms
 
 
 class LedgerView(StrictRecord):
@@ -102,7 +103,7 @@ class ReplaySource(StrictRecord):
 class Interaction(StrictRecord):
     """An accepted transfer or message in the frame's tick (observer view)."""
 
-    kind: Literal["transfer", "communicate"]
+    kind: Literal["transfer", "communicate", "reproduce"]
     from_id: str
     to_id: str
     from_x: int
@@ -113,7 +114,7 @@ class Interaction(StrictRecord):
 
 
 class GridFrame(StrictRecord):
-    schema_version: Literal[8] = 8
+    schema_version: Literal[9] = 9
     mode: Literal["live"] = "live"
     run_id: UUID
     created_at: datetime
@@ -149,7 +150,7 @@ class GridFrame(StrictRecord):
 class HistoryFrame(StrictRecord):
     """A read-only reconstruction of an earlier committed tick."""
 
-    schema_version: Literal[8] = 8
+    schema_version: Literal[9] = 9
     mode: Literal["history"] = "history"
     run_id: UUID
     tick: int
@@ -199,6 +200,7 @@ def organism_views(world: World, revealed: frozenset[str]) -> tuple[OrganismView
             material_capacity=world.life.material_capacity if world.schema >= 5 else 0,
             retired_material=o.retired_material,
             lifespan=o.lifespan if o.id in revealed else None,
+            parent_ids=o.parent_ids,
         )
         for o in world.organisms
     )

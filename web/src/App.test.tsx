@@ -182,7 +182,7 @@ it("reports a backend on an older contract as a version mismatch, not an outage"
     const view = render(<App />);
     openDashboard();
     expect((await screen.findByTestId("version-alert")).textContent).toContain(
-      `sent frame version ${version}; this page expects version 8`,
+      `sent frame version ${version}; this page expects version 9`,
     );
     expect(screen.queryByText("Backend unavailable")).toBeNull();
     expect(screen.getByText("Version mismatch")).toBeTruthy();
@@ -1612,6 +1612,7 @@ it("compares tendencies with observed behaviour and shows an organism's profile"
     messages_received: 0,
     material_packed: 0,
     material_unpacked: 0,
+    children: 0,
   });
   const state = backend({
     frame: makeFrame({ tick: 12, state_schema: 9, organisms: [a, b] }),
@@ -1801,5 +1802,58 @@ it("distinguishes facts, claims and reflections and inspects a reflection reques
   );
   expect((await screen.findByTestId("decision-detail")).textContent).toContain(
     "reflection request: 1 of its own records, energy 70",
+  );
+});
+
+it("shows a birth on the stage and the child's parent and generation", async () => {
+  const parent = makeOrganism();
+  const child = makeOrganism({
+    id: "org-0002",
+    x: 2,
+    y: 0,
+    generation: 1,
+    birth_tick: 1,
+    parent_ids: ["org-0001"],
+  });
+  const state = backend({
+    frame: makeFrame({
+      tick: 1,
+      organisms: [parent, child],
+      interactions: [
+        {
+          kind: "reproduce",
+          from_id: "org-0001",
+          to_id: "org-0002",
+          from_x: 1,
+          from_y: 0,
+          to_x: 2,
+          to_y: 0,
+          detail: "born, endowment 40 energy",
+        },
+      ],
+    }),
+  });
+  state.organism = (id) =>
+    makeOrganismDetail(id === "org-0002" ? child : parent);
+  vi.stubGlobal("fetch", stubBackend(state));
+  render(<App />);
+  const feed = await screen.findByRole("list", { name: "Recent exchanges" });
+  expect(feed.textContent).toContain(
+    "org-0001 → org-0002 born, endowment 40 energy",
+  );
+  expect(screen.getByText("Birth (dotted arrow)")).toBeTruthy();
+  openDashboard();
+  const list = screen.getByRole("list", { name: "Organism list" });
+  fireEvent.click(within(list).getAllByRole("button")[1]);
+  await waitFor(() =>
+    expect(screen.getByTestId("organism-parent").textContent).toBe("org-0001"),
+  );
+  fireEvent.click(
+    within(screen.getByTestId("organism-parent")).getByRole("button"),
+  );
+  await waitFor(() =>
+    expect(screen.getByTestId("organism-parent").textContent).toBe(
+      "none (seed)",
+    ),
   );
 });

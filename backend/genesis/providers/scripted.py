@@ -27,6 +27,10 @@ class ScriptedProvider(Provider):
         self.policies = dict(policies)  # actor id -> script name (fixed at run creation)
         self.calls = 0
 
+    def adopt(self, child_id: str, parent_id: str, policy: str) -> None:
+        """A child born in the run (M12) follows its recorded policy (the parent's)."""
+        self.policies.setdefault(child_id, policy)
+
     def decide(self, request: DecisionRequest, cancel: threading.Event) -> ProviderResponse:
         self.calls += 1
         started = time.monotonic()

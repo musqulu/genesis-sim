@@ -211,6 +211,8 @@ class Organism:
     tendencies: tuple[int, ...] | None = None
     # Schema 10: tick of its last reflection opportunity (cooldown and trigger window).
     reflected_at_tick: int | None = None
+    # Schema 11: tick of its last birth as a parent (reproduction cooldown).
+    last_reproduced_tick: int | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.id, str) or not self.id:
@@ -251,9 +253,13 @@ class Organism:
         """First tick at which the organism no longer lives (engine-private)."""
         return self.birth_tick + self.lifespan
 
-    def to_dict(self, schema: int = 10) -> dict:
+    def to_dict(self, schema: int = 11) -> dict:
         data = asdict(self)
         data["parent_ids"] = list(self.parent_ids)
+        if schema < 11:  # earlier records never reproduced
+            if self.last_reproduced_tick is not None:
+                raise ValueError("reproduction state requires state schema 11")
+            del data["last_reproduced_tick"]
         if schema < 10:  # earlier records never reflected
             if self.reflected_at_tick is not None:
                 raise ValueError("reflection state requires state schema 10")
@@ -313,9 +319,10 @@ class World:
     # 7: M08 (+ memory rules and every organism's active memory records);
     # 8: M09 (+ exchange rules and every pending or unread inbox item);
     # 9: M10 (+ tendency mode and each organism's starting tendencies);
-    # 10: M11 (+ reflection rules, last reflection tick, reflection records).
+    # 10: M11 (+ reflection rules, last reflection tick, reflection records);
+    # 11: M12 (+ reproduction rules and each organism's last birth tick).
     # Each schema hashes exactly the fields it defines, so older runs keep their hashes.
-    schema: int = 10
+    schema: int = 11
     life: LifeConfig | None = None
     organisms: tuple[Organism, ...] = ()
     memories: tuple[MemoryRecord, ...] = ()  # active records only, ordered by id
@@ -344,6 +351,8 @@ class World:
             raise ValueError("memory requires state schema 7")
         if self.schema < 8 and (self.messages or any(o.messages_sent for o in self.organisms)):
             raise ValueError("messages require state schema 8")
+        if self.schema < 11 and any(o.last_reproduced_tick is not None for o in self.organisms):
+            raise ValueError("reproduction requires state schema 11")
         if self.schema < 10 and (
             any(o.reflected_at_tick is not None for o in self.organisms)
             or any(m.kind == "reflection" for m in self.memories)

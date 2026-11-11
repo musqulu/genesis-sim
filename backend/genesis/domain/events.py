@@ -42,6 +42,8 @@ COMMUNICATE_RULE = "action.communicate.v1"
 DELIVERY_RULE = "message.delivery.v1"
 READ_RULE = "message.read.v1"
 REFLECT_RULE = "cognition.reflect.v1"
+REPRODUCE_RULE = "action.reproduce.v1"
+BIRTH_RULE = "life.birth.v1"
 
 
 @dataclass(frozen=True, slots=True)

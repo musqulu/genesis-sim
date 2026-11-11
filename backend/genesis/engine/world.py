@@ -19,7 +19,7 @@ from genesis.domain.events import (
     WorldEvent,
 )
 from genesis.domain.state import Cell, Ledger, MemoryRecord, Message, Organism, World
-from genesis.engine import actions, cadence, lifecycle, memory, messages, reflection
+from genesis.engine import actions, cadence, inheritance, lifecycle, memory, messages, reflection
 from genesis.engine.ledger import apply_entries, require_balanced
 from genesis.engine.perception import Observation, observe
 from genesis.engine.rules import RULES
@@ -85,7 +85,7 @@ def create_world(config: WorldConfig, life: LifeConfig | None = None) -> World:
             initial_material=sum(c.loose_material for c in cells),
         ),
         rng_state=rng_state_json(rng),
-        schema=10,
+        schema=11,
         life=life,
         organisms=organisms,
     )
@@ -349,6 +349,8 @@ def finish_tick(prepared: PreparedTick, outcomes: dict[str, tuple[Outcome, dict]
         else:
             resolved = actions.resolve(candidate, organism, outcome, payload)
         record(resolved)
+        if resolved.rule_id == "action.reproduce.v1":  # an observer record of the new life
+            record(inheritance.birth_event(candidate, resolved))
         after = candidate.organism(slot.organism_id)
         if after.alive and after.energy == 0:
             record(lifecycle.death_event(candidate, after, "exhaustion"))

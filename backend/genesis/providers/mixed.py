@@ -23,6 +23,11 @@ class MixedProvider(Provider):
         self.capabilities = Capabilities("none", None, None, 1)
         self.calls = 0
 
+    def adopt(self, child_id: str, parent_id: str, policy: str) -> None:
+        """A child born in the run (M12) keeps its parent's model for life."""
+        if parent_id in self.assignment:
+            self.assignment.setdefault(child_id, self.assignment[parent_id])
+
     def member_for(self, actor_id: str) -> Provider:
         index = self.assignment.get(actor_id)
         if index is None:

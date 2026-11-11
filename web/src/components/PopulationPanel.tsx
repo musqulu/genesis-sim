@@ -53,6 +53,7 @@ export default function PopulationPanel({
           <thead>
             <tr>
               <th>Organism</th>
+              <th>Gen</th>
               <th title={info.tendency_names.join(", ")}>
                 Tendencies ({info.tendency_names.map((n) => n[0]).join("")})
               </th>
@@ -62,6 +63,7 @@ export default function PopulationPanel({
               <th>Extracted E/M</th>
               <th>Gifts out/in</th>
               <th>Msgs out/in</th>
+              <th>Children</th>
             </tr>
           </thead>
           <tbody>
@@ -81,6 +83,7 @@ export default function PopulationPanel({
                     </button>
                     {o.alive ? "" : ` † t${o.death_tick}`}
                   </td>
+                  <td>{o.generation ?? 0}</td>
                   <td>
                     {o.tendencies ? (
                       <TendencyBars tendencies={o.tendencies} compact />
@@ -98,6 +101,7 @@ export default function PopulationPanel({
                   <td>
                     {s ? `${s.messages_sent}/${s.messages_received}` : "—"}
                   </td>
+                  <td>{s?.children ?? 0}</td>
                 </tr>
               );
             })}

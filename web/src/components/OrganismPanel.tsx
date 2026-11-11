@@ -34,6 +34,8 @@ function describeOutcome(detail: OrganismDetail): string {
     return `Extracted ${s.amount} ${s.resource} (fee ${s.energy_cost})`;
   if (s.action === "modify")
     return `${s.mode === "pack" ? "Packed" : "Unpacked"} ${s.amount} (packed ${s.packed_before}→${s.packed_after}, −${s.energy_cost} energy)`;
+  if (s.action === "reproduce")
+    return `Gave birth to ${s.child_id} (endowment ${s.endowment}, fee ${s.energy_cost})`;
   if (s.action === "reflect")
     return `Reflected: ${s.count} interpretation(s)${s.energy_cost ? ` (−${s.energy_cost} energy)` : ""}`;
   if (s.action === "transfer")
@@ -142,6 +144,21 @@ export default function OrganismPanel({
               <dt>Born / generation</dt>
               <dd>
                 tick {o.birth_tick} / {o.generation}
+              </dd>
+            </div>
+            <div>
+              <dt>Parent</dt>
+              <dd data-testid="organism-parent">
+                {o.parent_ids.length ? (
+                  <button
+                    className="link-button"
+                    onClick={() => onSelect(o.parent_ids[0])}
+                  >
+                    {o.parent_ids[0]}
+                  </button>
+                ) : (
+                  "none (seed)"
+                )}
               </dd>
             </div>
             {!o.alive && (

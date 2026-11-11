@@ -28,6 +28,7 @@ export interface OrganismView {
   material_capacity: number;
   retired_material: number;
   lifespan: number | null; // withheld while alive
+  parent_ids: string[]; // v9: empty for seed organisms
 }
 
 export interface Ledger {
@@ -63,7 +64,7 @@ export interface ReplaySource {
 
 /** An accepted transfer or message committed in a frame's tick (observer view). */
 export interface Interaction {
-  kind: "transfer" | "communicate";
+  kind: "transfer" | "communicate" | "reproduce";
   from_id: string;
   to_id: string;
   from_x: number;
@@ -88,7 +89,7 @@ export interface WorldView {
 }
 
 export interface GridFrame {
-  schema_version: 8;
+  schema_version: 9;
   mode: "live";
   run_id: string;
   created_at: string;
@@ -308,7 +309,7 @@ export async function requestDecision(
 }
 
 export interface HistoryFrame extends WorldView {
-  schema_version: 8;
+  schema_version: 9;
   mode: "history";
   run_id: string;
   live_tick: number;
@@ -426,7 +427,7 @@ export class ApiError extends Error {
   }
 }
 
-export const FRAME_VERSION = 8;
+export const FRAME_VERSION = 9;
 
 /** The backend answered, but with a frame contract this page does not understand. */
 export class IncompatibleBackend extends Error {
@@ -754,6 +755,7 @@ export interface BehaviourStats {
   messages_received: number;
   material_packed: number;
   material_unpacked: number;
+  children: number; // M12: births as a parent
 }
 
 export interface PopulationInfo {
@@ -765,6 +767,8 @@ export interface PopulationInfo {
     id: string;
     alive: boolean;
     death_tick: number | null;
+    generation?: number;
+    parent_ids?: string[];
     tendencies: Record<string, number> | null;
     stats: BehaviourStats | null;
   }[];

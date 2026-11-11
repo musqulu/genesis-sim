@@ -62,6 +62,22 @@ def action_schema(world: World) -> dict:
                 },
             },
         ),
+        "reproduce": {  # M12: material is optional, so not in `required`
+            "type": "object",
+            "properties": {
+                "action": {"const": "reproduce"},
+                "direction": {"enum": list(DIRECTIONS)},
+                "endowment": {
+                    "type": "integer",
+                    "minimum": life.reproduction_min_endowment,
+                    "maximum": life.energy_capacity,
+                },
+                "material": {"type": "integer", "minimum": 0, "maximum": life.material_capacity},
+                "explanation": explanation,
+            },
+            "required": ["action", "direction", "endowment"],
+            "additionalProperties": False,
+        },
         "wait": variant("wait", {}),
         "move": variant("move", {"direction": {"enum": list(DIRECTIONS)}}),
         "extract": variant(

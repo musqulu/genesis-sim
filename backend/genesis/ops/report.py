@@ -125,7 +125,7 @@ def build_summary(store: SqliteStore, run_id: str, *, status: str | None = None)
                 a[f"{s['resource']}_extracted"] += s["amount"]
             elif s.get("action") == "modify":
                 a["packed" if s["mode"] == "pack" else "unpacked"] += s["amount"]
-            elif s.get("action") in ("transfer", "communicate"):
+            elif s.get("action") in ("transfer", "communicate", "reproduce"):
                 exchanges.append((actor, s))
     for tick, actor, raw, parse_status, outcome, _rule, reason, usage, parse_note in attempts:
         a = by_actor.get(actor)
@@ -354,6 +354,13 @@ def render_markdown(summary: dict) -> str:
     if written or kept:
         lines.append(
             f"Memory cost the organisms {written} energy to write and {kept} energy to keep."
+        )
+    births = [(a, x) for a, x in s.get("exchanges", []) if x["action"] == "reproduce"]
+    if births:
+        deepest = max(x["generation"] for _, x in births)
+        lines.append(
+            f"{len(births)} organism(s) were born to parents in this run (deepest generation "
+            f"{deepest}); every birth was a parent's own choice."
         )
     gifts = [(a, x) for a, x in s.get("exchanges", []) if x["action"] == "transfer"]
     words = [(a, x) for a, x in s.get("exchanges", []) if x["action"] == "communicate"]

@@ -86,6 +86,11 @@ def make_provider(
             actors = tuple(a for a, i in profile["assignment"].items() if i == index)
             members.append(_single(world, member["cognition"], member["profile"], usage(actors)))
         assignment = {actor: int(i) for actor, i in profile.get("assignment", {}).items()}
+        for organism in sorted(world.organisms, key=lambda o: (o.birth_tick, o.id)):
+            if organism.id not in assignment and organism.parent_ids:  # born in the run
+                parent = organism.parent_ids[0]
+                if parent in assignment:
+                    assignment[organism.id] = assignment[parent]
         return MixedProvider(members, assignment)
     return _single(world, world.life.provider, profile, usage(None), delay_scale)
 
@@ -264,8 +269,12 @@ class SimulationRunner:
             interaction(e.actor_id, e.summary)
             for e in result.events
             if e.type == "action_accepted"
-            and e.summary.get("action") in ("transfer", "communicate")
+            and e.summary.get("action") in ("transfer", "communicate", "reproduce")
         )
+        for event in result.events:  # a newborn uses its parent's model/policy (M12)
+            if event.rule_id == "life.birth.v1" and hasattr(self._provider, "adopt"):
+                s = event.summary
+                self._provider.adopt(event.actor_id, s["parent_id"], s["policy"])
         update_previous(self._previous, result)
 
     def _take_step_control(self) -> ControlRecord | None:

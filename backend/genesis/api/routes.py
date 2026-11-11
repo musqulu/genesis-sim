@@ -377,6 +377,8 @@ def population(sim: Runner, at_tick: Annotated[int | None, Query(ge=0)] = None) 
                 "id": o.id,
                 "alive": o.alive,
                 "death_tick": o.death_tick,
+                "generation": o.generation,
+                "parent_ids": list(o.parent_ids),
                 "tendencies": o.tendency_map(),
                 "stats": stats.get(o.id),
             }
@@ -515,7 +517,7 @@ def health(request: Request, sim: Runner) -> dict:
     snapshot = sim.snapshot()
     return {
         "status": "ok",
-        "milestone": "M11",
+        "milestone": "M12",
         "provider": snapshot.provider,
         "pending": snapshot.pending,
         "tick": snapshot.world.tick,

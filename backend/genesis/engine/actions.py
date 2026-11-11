@@ -20,6 +20,7 @@ from genesis.domain.events import (
     MODIFY_RULE,
     MOVE_RULE,
     PARSE_RULE,
+    REPRODUCE_RULE,
     TRANSFER_RULE,
     VALIDATION_RULE,
     WAIT_RULE,
@@ -30,6 +31,7 @@ from genesis.domain.events import (
     WorldEvent,
 )
 from genesis.domain.state import Message, Organism, World
+from genesis.engine import inheritance
 
 
 def move_cost(world: World, x: int, y: int) -> int:
@@ -38,9 +40,15 @@ def move_cost(world: World, x: int, y: int) -> int:
 
 
 def available_actions(world: World) -> tuple[str, ...]:
-    if world.schema >= 8 and world.life is not None and not world.life.exchange_enabled:
-        return A.ACTIONS_BY_SCHEMA[7]
-    return A.ACTIONS_BY_SCHEMA[min(world.schema, 8)]
+    if world.schema < 8:
+        return A.ACTIONS_BY_SCHEMA.get(world.schema, ())
+    life = world.life
+    actions = list(A.ACTIONS_BY_SCHEMA[7])
+    if life.exchange_enabled:
+        actions += ["transfer", "communicate"]
+    if world.schema >= 11 and life.reproduction_enabled:
+        actions.append("reproduce")
+    return tuple(actions)
 
 
 def message_fee(world: World, size: int) -> int:
@@ -175,6 +183,8 @@ def resolve(world: World, organism: Organism, proposal: A.Proposal, payload: dic
 
     if action in ("transfer", "communicate"):
         return _exchange(world, organism, proposal, payload)
+    if action == "reproduce":
+        return _reproduce(world, organism, proposal, payload)
 
     index = organism.y * world.config.width + organism.x
     cell = world.cells[index]
@@ -410,6 +420,77 @@ def _exchange(world: World, organism: Organism, proposal: A.Proposal, payload) -
         payload,
     )
     return replace(event, message_changes=(message,))
+
+
+def _reproduce(world: World, organism: Organism, proposal: A.Proposal, payload) -> WorldEvent:
+    """Validate a birth (schema 11). Check order: arguments -> endowment bounds -> cooldown
+    -> placement -> energy -> material. The accepted event creates the child atomically:
+    parent debits, child record, fee dissipated, endowment conserved."""
+    life = world.life
+    endowment, material = proposal.endowment, proposal.material
+    if material is None:
+        material = 0
+    if (
+        not _only(proposal, "direction", "endowment", "material")
+        or not isinstance(proposal.direction, str)
+        or proposal.direction not in DIRECTIONS
+        or type(endowment) is not int
+        or type(material) is not int
+        or material < 0
+    ):
+        return _reject(world, organism, proposal, A.INVALID_ARGUMENTS, payload)
+    if endowment < life.reproduction_min_endowment:
+        return _reject(world, organism, proposal, A.ENDOWMENT_TOO_SMALL, payload)
+    if endowment > life.energy_capacity or material > life.material_capacity:
+        return _reject(world, organism, proposal, A.OVER_CAPACITY, payload)
+    last = organism.last_reproduced_tick
+    if last is not None and world.tick - last < life.reproduction_cooldown:
+        return _reject(world, organism, proposal, A.COOLDOWN, payload)
+    dx, dy = DIRECTIONS[proposal.direction]
+    x, y = organism.x + dx, organism.y + dy
+    if not (0 <= x < world.config.width and 0 <= y < world.config.height):
+        return _reject(world, organism, proposal, A.OUT_OF_BOUNDS, payload)
+    if world.occupant(x, y) is not None:
+        return _reject(world, organism, proposal, A.OCCUPIED, payload)
+    fee = life.reproduction_fee
+    if organism.energy < fee + endowment + life.reproduction_retain:
+        return _reject(world, organism, proposal, A.INSUFFICIENT_ENERGY, payload)
+    if organism.carried_material < material:
+        return _reject(world, organism, proposal, A.INSUFFICIENT_SOURCE, payload)
+    child, log = inheritance.make_child(world, organism, x, y, endowment, material)
+    changes = [
+        OrganismChange(organism.id, "energy", organism.energy, organism.energy - fee - endowment),
+        OrganismChange(
+            organism.id, "last_reproduced_tick", organism.last_reproduced_tick, world.tick
+        ),
+    ]
+    if material:
+        changes.append(
+            OrganismChange(
+                organism.id,
+                "carried_material",
+                organism.carried_material,
+                organism.carried_material - material,
+            )
+        )
+    changes.append(OrganismChange(child.id, "record", None, child.to_dict(world.schema)))
+    summary = {
+        "action": "reproduce",
+        "direction": proposal.direction,
+        "child_id": child.id,
+        "target": child.id,
+        "endowment": endowment,
+        "material": material,
+        "energy_cost": fee,
+        "from_x": organism.x,
+        "from_y": organism.y,
+        "to_x": x,
+        "to_y": y,
+        "generation": child.generation,
+        "inheritance": log,
+    }
+    ledger = [LedgerEntry("energy", "reproduction_fee", fee)] if fee else []
+    return _accept(world, organism, REPRODUCE_RULE, summary, changes, [], ledger, payload)
 
 
 PREVIEW_PROPOSALS = (

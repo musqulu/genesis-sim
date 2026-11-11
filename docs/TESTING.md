@@ -1,6 +1,6 @@
 # Testing and experimental evidence
 
-Status: updated 2026-11-10. Automated tests exist and have been run through M11; see each milestone's validation note (latest: [M11](validation/M11.md)) for evidence and outstanding checks. The broader strategy below remains a plan for later milestones, including local MLX-LM and API-connected models. Milestone-specific tests and manual procedures are in [ROADMAP.md](ROADMAP.md); rules under test are in [ARCHITECTURE.md](ARCHITECTURE.md).
+Status: updated 2026-11-10. Automated tests exist and have been run through M12; see each milestone's validation note (latest: [M12](validation/M12.md)) for evidence and outstanding checks. The broader strategy below remains a plan for later milestones, including local MLX-LM and API-connected models. Milestone-specific tests and manual procedures are in [ROADMAP.md](ROADMAP.md); rules under test are in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## What counts as failure
 

@@ -1239,6 +1239,9 @@ code {
 .exchange-feed li.communicate strong {
   color: #7cc4ff;
 }
+.exchange-feed li.reproduce strong {
+  color: #ff8fd1;
+}
 .exchange-feed .exchange-tick {
   color: var(--muted);
 }
