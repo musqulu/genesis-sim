@@ -120,6 +120,10 @@ def request_id(tick: int, actor_id: str) -> str:
 def build_request(
     run_id: str, world: World, slot: DecisionSlot, previous_result: dict | None
 ) -> DecisionRequest:
+    if slot.purpose == "reflect":  # M11: a reflection opportunity replaces the decision
+        from genesis.cognition.reflection import build_reflection_request
+
+        return build_reflection_request(run_id, world, slot)
     context = {
         "observation": slot.observation.to_dict(),
         "previous_result": previous_result,

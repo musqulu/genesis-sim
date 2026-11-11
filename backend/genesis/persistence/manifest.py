@@ -10,8 +10,18 @@ import json
 from dataclasses import dataclass
 
 SUPPORTED_MANIFESTS = (1, 2, 3)  # 1: M02 run sealed by migration; 2: M03 runs; 3: M04+ runs
-SUPPORTED_STATE_SCHEMAS = (2, 3, 4, 5, 6, 7, 8, 9)  # 2: M02; 3: +PRNG; 4: +organisms; 5: +material
-# 6: +cognition scheduling; 7: +costly memory; 8: +local exchange; 9: +tendencies
+SUPPORTED_STATE_SCHEMAS = (
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+)  # 2: M02; 3: +PRNG; 4: +organisms; 5: +material
+# 6: +cognition scheduling; 7: +costly memory; 8: +local exchange; 9: +tendencies; 10: +reflection
 
 
 def canonical_json(value: object) -> str:

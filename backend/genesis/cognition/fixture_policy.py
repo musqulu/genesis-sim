@@ -170,7 +170,33 @@ def tendency_probe(context: dict) -> Proposal:
     return Proposal("extract", resource="energy", amount=5)
 
 
+def walk_square(context: dict) -> Proposal:
+    """reflection fixtures: the square_walk script, decided from the request context."""
+    return script_step("square_walk", context["observation"]["age"])
+
+
+def reflect_cite_two(context: dict) -> dict:
+    """reflection_probe: one interpretation citing the two newest records it was shown."""
+    ids = [m["id"] for m in context["memories"]][:2]
+    return {"reflections": [{"text": "I keep walking the same small square.", "evidence": ids}]}
+
+
+def reflect_cite_unknown(context: dict) -> dict:
+    """reflection_invalid: cites a record it was never shown (must be rejected)."""
+    return {
+        "reflections": [{"text": "Something I never remembered.", "evidence": ["org-0001-m99999"]}]
+    }
+
+
+# Scripted reflection replies (M11), by fixture policy name; others reply with none.
+REFLECT_POLICIES: dict[str, Callable[[dict], dict]] = {
+    "walk_reflect": reflect_cite_two,
+    "walk_reflect_invalid": reflect_cite_unknown,
+}
+
 CONTEXT_POLICIES: dict[str, Callable[[dict], Proposal]] = {
+    "walk_reflect": walk_square,
+    "walk_reflect_invalid": walk_square,
     "tendency_probe": tendency_probe,
     "recall_return": recall_return,
     "exchange_giver": exchange_giver,

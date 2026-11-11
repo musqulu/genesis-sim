@@ -9,7 +9,7 @@ import random
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 
-from genesis.domain.actions import Proposal, Unparsed
+from genesis.domain.actions import Proposal, ReflectionProposal, Unparsed
 from genesis.domain.config import FIXTURES, TENDENCIES, TENDENCY_MAX, LifeConfig, WorldConfig
 from genesis.domain.events import (
     INIT_RULE,
@@ -19,7 +19,7 @@ from genesis.domain.events import (
     WorldEvent,
 )
 from genesis.domain.state import Cell, Ledger, MemoryRecord, Message, Organism, World
-from genesis.engine import actions, cadence, lifecycle, memory, messages
+from genesis.engine import actions, cadence, lifecycle, memory, messages, reflection
 from genesis.engine.ledger import apply_entries, require_balanced
 from genesis.engine.perception import Observation, observe
 from genesis.engine.rules import RULES
@@ -85,7 +85,7 @@ def create_world(config: WorldConfig, life: LifeConfig | None = None) -> World:
             initial_material=sum(c.loose_material for c in cells),
         ),
         rng_state=rng_state_json(rng),
-        schema=9,
+        schema=10,
         life=life,
         organisms=organisms,
     )
@@ -229,6 +229,9 @@ class DecisionSlot:
     inbox: tuple[messages.InboxView, ...] | None = None
     # Schema 9: its own starting tendencies by name (None: no tendencies in this run).
     tendencies: dict[str, int] | None = None
+    # Schema 10: "decide" (one action) or "reflect" (interpret its own records instead).
+    # For a reflection, `memories` holds exactly the records shown and `inbox` is None.
+    purpose: str = "decide"
 
 
 @dataclass(frozen=True, slots=True)
@@ -240,7 +243,7 @@ class PreparedTick:
     slots: tuple[DecisionSlot, ...]  # in resolution order
 
 
-Outcome = Proposal | Unparsed
+Outcome = Proposal | ReflectionProposal | Unparsed
 
 
 def prepare_tick(world: World) -> PreparedTick:
@@ -280,14 +283,16 @@ def prepare_tick(world: World) -> PreparedTick:
             reason = cadence.due_reason(candidate, organism, observe(candidate, organism))
             if reason is not None:
                 due.append((organism, reason, observe(candidate, organism)))
+        reflecting = frozenset(o.id for o, _, _ in due if reflection.eligible(candidate, o))
         if due:
-            record(cadence.decision_round_event(candidate, due))
+            record(cadence.decision_round_event(candidate, due, reflecting))
             for event in lifecycle.starvation_deaths(candidate):  # the fee can be fatal
                 record(event)
         reasons = {o.id: r for o, r, _ in due}
         deciding = [i for i in reasons if candidate.organism(i).alive]
         for organism_id in cadence.resolution_order(deciding, tick):
             organism = candidate.organism(organism_id)
+            reflecting_now = organism_id in reflecting
             slots.append(
                 DecisionSlot(
                     organism_id,
@@ -295,9 +300,16 @@ def prepare_tick(world: World) -> PreparedTick:
                     reasons[organism_id],
                     observe(candidate, organism),
                     (organism.x, organism.y),
-                    memory.views(candidate, organism) if memory.enabled(candidate) else None,
-                    messages.views(candidate, organism_id) if messages.enabled(candidate) else None,
+                    reflection.shown(candidate, organism)
+                    if reflecting_now
+                    else memory.views(candidate, organism)
+                    if memory.enabled(candidate)
+                    else None,
+                    None
+                    if reflecting_now or not messages.enabled(candidate)
+                    else messages.views(candidate, organism_id),
                     organism.tendency_map(),
+                    "reflect" if reflecting_now else "decide",
                 )
             )
         if candidate.extinct:
@@ -329,6 +341,11 @@ def finish_tick(prepared: PreparedTick, outcomes: dict[str, tuple[Outcome, dict]
         organism = candidate.organism(slot.organism_id)
         if isinstance(outcome, Unparsed):
             resolved = actions.unparsed_event(candidate, organism, outcome, payload)
+        elif slot.purpose == "reflect":
+            if not isinstance(outcome, ReflectionProposal):
+                raise ValueError("A reflection opportunity needs a reflection reply")
+            shown_ids = frozenset(v.id for v in slot.memories or ())
+            resolved = reflection.resolve(candidate, organism, outcome, shown_ids, payload)
         else:
             resolved = actions.resolve(candidate, organism, outcome, payload)
         record(resolved)
@@ -339,9 +356,23 @@ def finish_tick(prepared: PreparedTick, outcomes: dict[str, tuple[Outcome, dict]
             if slot.inbox:
                 record(messages.read_event(candidate, slot.organism_id, slot.inbox))
             if memory.enabled(candidate):
+                accepted_reflections = (
+                    tuple(
+                        (r["text"], tuple(r["evidence"]))
+                        for r in resolved.summary.get("reflections", ())
+                    )
+                    if resolved.rule_id == "cognition.reflect.v1"
+                    else ()
+                )
                 record(
                     memory.write_event(
-                        candidate, after, slot.observation, slot.origin, resolved, slot.inbox or ()
+                        candidate,
+                        after,
+                        slot.observation,
+                        slot.origin,
+                        resolved,
+                        slot.inbox or (),
+                        accepted_reflections,
                     )
                 )
     if candidate.extinct and not any(e.type == "extinction" for e in events):

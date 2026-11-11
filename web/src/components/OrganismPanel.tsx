@@ -34,6 +34,8 @@ function describeOutcome(detail: OrganismDetail): string {
     return `Extracted ${s.amount} ${s.resource} (fee ${s.energy_cost})`;
   if (s.action === "modify")
     return `${s.mode === "pack" ? "Packed" : "Unpacked"} ${s.amount} (packed ${s.packed_before}→${s.packed_after}, −${s.energy_cost} energy)`;
+  if (s.action === "reflect")
+    return `Reflected: ${s.count} interpretation(s)${s.energy_cost ? ` (−${s.energy_cost} energy)` : ""}`;
   if (s.action === "transfer")
     return `Gave ${s.amount} ${s.resource} to ${s.target} (fee ${s.energy_cost})`;
   if (s.action === "communicate")

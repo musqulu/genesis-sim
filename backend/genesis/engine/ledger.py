@@ -19,6 +19,7 @@ ENERGY_CATEGORIES = {
     "memory_upkeep": "dissipation",
     "transfer_fee": "dissipation",
     "message_fee": "dissipation",
+    "reflection_fee": "dissipation",
     "death_retirement": "death_retirement",
 }
 

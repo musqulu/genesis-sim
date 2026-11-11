@@ -20,8 +20,7 @@ from uuid import uuid4
 
 from genesis.cognition import fixture_policy
 from genesis.cognition.context import DecisionRequest, build_request
-from genesis.cognition.policy import parse
-from genesis.cognition.session import decision_payload, update_previous
+from genesis.cognition.session import decision_payload, parse_for, update_previous
 from genesis.domain.config import LifeConfig, WorldConfig
 from genesis.domain.state import World
 from genesis.engine.actions import available_actions
@@ -370,7 +369,7 @@ class SimulationRunner:
         for slot in prepared.slots:
             request = pending.requests[slot.organism_id]
             raw, _ = pending.responses[slot.organism_id]
-            parsed = parse(raw, prepared.world.life, available)
+            parsed = parse_for(request, raw, prepared.world.life, available)
             parsed_by_actor[slot.organism_id] = parsed
             outcomes[slot.organism_id] = (
                 parsed.outcome,

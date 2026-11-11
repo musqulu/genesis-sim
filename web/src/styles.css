@@ -1616,3 +1616,28 @@ code {
 .change-table tr.selected-row td {
   background: #1d2a20;
 }
+
+.memory-kind {
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+}
+.memory-kind.reflection {
+  border-color: #c9a6ff;
+  color: #d9c2ff;
+}
+.memory-kind.message {
+  border-color: #7cc4ff;
+  color: #a9d8ff;
+}
+.memory-nature {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+}
+.memory-cites {
+  display: block;
+  color: #c9a6ff;
+  font-size: 10px;
+}

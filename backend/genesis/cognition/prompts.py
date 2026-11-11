@@ -61,6 +61,10 @@ TENDENCY_TEXT = (
 
 
 def prompt_version(request: DecisionRequest) -> str:
+    if request.purpose == "reflect":
+        from genesis.cognition.reflection import REFLECTION_PROMPT_VERSION
+
+        return REFLECTION_PROMPT_VERSION
     if "tendencies" in request.context:
         return PROMPT_V4
     if "inbox" in request.context:
@@ -69,6 +73,10 @@ def prompt_version(request: DecisionRequest) -> str:
 
 
 def render(request: DecisionRequest) -> list[dict]:
+    if request.purpose == "reflect":
+        from genesis.cognition import reflection
+
+        return reflection.render(request)
     context = request.context
     user = {
         "observation": context["observation"],

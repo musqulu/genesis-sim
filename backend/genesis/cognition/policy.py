@@ -77,13 +77,13 @@ _MODELS = {
 
 @dataclass(frozen=True, slots=True)
 class ParseResult:
-    outcome: Proposal | Unparsed
+    outcome: Proposal | Unparsed  # or a ReflectionProposal (M11)
     explanation: str | None = None
     note: str | None = None  # how a valid reply was read, e.g. FENCE_NOTE
 
     @property
     def status(self) -> str:
-        return "valid" if isinstance(self.outcome, Proposal) else self.outcome.reason
+        return self.outcome.reason if isinstance(self.outcome, Unparsed) else "valid"
 
     @property
     def detail(self) -> str | None:

@@ -14,8 +14,7 @@ import json
 import sys
 
 from genesis.cognition.context import build_request
-from genesis.cognition.policy import parse
-from genesis.cognition.session import decision_payload, update_previous
+from genesis.cognition.session import decision_payload, parse_for, update_previous
 from genesis.domain.config import FIXTURES, WorldConfig
 from genesis.engine.actions import available_actions
 from genesis.engine.world import create_world, finish_tick, prepare_tick
@@ -79,7 +78,7 @@ def generate(name: str) -> dict:
                     "delay_ms": spec.get("delay_ms", 0),
                 }
             )
-            parsed = parse(raw, prepared.world.life, available_actions(prepared.world))
+            parsed = parse_for(request, raw, prepared.world.life, available_actions(prepared.world))
             outcomes[slot.organism_id] = (
                 parsed.outcome,
                 decision_payload(slot, request, raw, parsed),

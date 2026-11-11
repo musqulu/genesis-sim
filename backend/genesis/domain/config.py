@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-RULES_VERSION = "m10-rules-1"
+RULES_VERSION = "m11-rules-1"
 # Rules identity hashed into each state schema; old schemas keep their original value so
 # that runs recorded under them still verify.
 RULES_BY_SCHEMA = {
@@ -11,7 +11,8 @@ RULES_BY_SCHEMA = {
     6: "m06-rules-1",
     7: "m08-rules-1",
     8: "m09-rules-1",
-    9: RULES_VERSION,
+    9: "m10-rules-1",
+    10: RULES_VERSION,
 }
 # Lifecycle/material fields introduced with state schema 5 (M05). They are omitted from
 # schema-4 serializations so M04 runs keep byte-identical hashes and stored records.
@@ -55,6 +56,15 @@ M09_LIFE_FIELDS = (
 )
 # Starting tendencies introduced with state schema 9 (M10).
 M10_LIFE_FIELDS = ("tendency_mode",)
+# Bounded reflection introduced with state schema 10 (M11).
+M11_LIFE_FIELDS = (
+    "reflection_enabled",
+    "reflection_threshold",
+    "reflection_cooldown",
+    "reflection_fee",
+    "reflection_max",
+    "reflection_context_max",
+)
 # Competing dispositions (constitution §3), each an integer 0-100, fixed for a life. They
 # are inclinations stated to the organism's own cognition, never rules, goals or roles.
 TENDENCIES = (
@@ -164,6 +174,15 @@ class LifeConfig:
     # the world seed; "neutral" draws the same numbers (so the world is identical) but gives
     # every organism 50 for all six - the paired control condition.
     tendency_mode: str = "seeded"
+    # M11 bounded reflection (schema 10). A due decision becomes a reflection request when
+    # the organism holds at least `reflection_threshold` salient records acquired since its
+    # last reflection and `reflection_cooldown` ticks have passed; it never gets both.
+    reflection_enabled: bool = True  # False keeps a fixture's earlier behavior
+    reflection_threshold: int = 8  # new salient (salience >= 2) active records
+    reflection_cooldown: int = 20  # ticks between reflection opportunities
+    reflection_fee: int = 2  # energy per accepted reflection response, plus storage
+    reflection_max: int = 2  # stored reflections per response at most
+    reflection_context_max: int = 16  # own records shown to a reflection request
 
     def __post_init__(self) -> None:
         _check_int("energy_capacity", self.energy_capacity, 1, 10_000)
@@ -204,6 +223,13 @@ class LifeConfig:
         _check_int("message_fee_per_64_bytes", self.message_fee_per_64_bytes, 0, 10_000)
         _check_int("inbox_capacity", self.inbox_capacity, 1, 1_000)
         _check_int("message_ttl", self.message_ttl, 1, 1_000_000)
+        if type(self.reflection_enabled) is not bool:
+            raise ValueError("reflection_enabled must be a boolean")
+        _check_int("reflection_threshold", self.reflection_threshold, 1, 10_000)
+        _check_int("reflection_cooldown", self.reflection_cooldown, 1, 1_000_000)
+        _check_int("reflection_fee", self.reflection_fee, 0, 10_000)
+        _check_int("reflection_max", self.reflection_max, 1, 8)
+        _check_int("reflection_context_max", self.reflection_context_max, 1, 64)
         if self.tendency_mode not in TENDENCY_MODES:
             raise ValueError("tendency_mode must be 'seeded', 'neutral' or 'off'")
         if not isinstance(self.provider, str) or not (
@@ -222,7 +248,7 @@ class LifeConfig:
         if len({(s.x, s.y) for s in self.seeds}) != len(self.seeds):
             raise ValueError("seed organisms may not share a cell")
 
-    def to_dict(self, schema: int = 9) -> dict:
+    def to_dict(self, schema: int = 10) -> dict:
         data = {
             "energy_capacity": self.energy_capacity,
             "start_energy": self.start_energy,
@@ -243,6 +269,8 @@ class LifeConfig:
             data.update({name: getattr(self, name) for name in M09_LIFE_FIELDS})
         if schema >= 9:
             data.update({name: getattr(self, name) for name in M10_LIFE_FIELDS})
+        if schema >= 10:
+            data.update({name: getattr(self, name) for name in M11_LIFE_FIELDS})
         return data
 
     @classmethod
@@ -271,11 +299,18 @@ class Fixture:
 # cognition fee. Their scripted policies now answer through the provider contract.
 _EVERY_TICK = {"decision_interval": 1, "cognition_fee": 0, "trigger_threshold": 0}
 # Fixtures from M04-M06 keep their behavior (and recordings) under M08 rules: no memory.
-_NO_MEMORY = {"memory_enabled": False, "exchange_enabled": False, "tendency_mode": "off"}
+_NO_MEMORY = {
+    "memory_enabled": False,
+    "exchange_enabled": False,
+    "tendency_mode": "off",
+    "reflection_enabled": False,
+}
 # M08 fixtures keep their behavior under M09 rules: memory, but no exchange actions.
-_NO_EXCHANGE = {"exchange_enabled": False, "tendency_mode": "off"}
+_NO_EXCHANGE = {"exchange_enabled": False, "tendency_mode": "off", "reflection_enabled": False}
 # M09 fixtures keep their behavior under M10 rules: exchange, but no tendencies.
-_NO_TENDENCIES = {"tendency_mode": "off"}
+_NO_TENDENCIES = {"tendency_mode": "off", "reflection_enabled": False}
+# M10 fixtures keep their behavior under M11 rules: tendencies, but no reflection.
+_NO_REFLECTION = {"reflection_enabled": False}
 
 FIXTURES: dict[str, Fixture] = {
     "zero_inflow": Fixture({"inflow_amount": 0}, LifeConfig(), "No energy inflow, no organisms"),
@@ -401,6 +436,7 @@ FIXTURES: dict[str, Fixture] = {
         {},
         LifeConfig(
             **_EVERY_TICK,
+            **_NO_REFLECTION,
             seeds=(
                 SeedOrganism(12, 12, "tendency_probe", (50, 50, 50, 90, 50, 50)),
                 SeedOrganism(13, 12, "wait", (50, 50, 50, 50, 50, 50)),
@@ -413,12 +449,28 @@ FIXTURES: dict[str, Fixture] = {
         {},
         LifeConfig(
             **_EVERY_TICK,
+            **_NO_REFLECTION,
             seeds=(
                 SeedOrganism(12, 12, "tendency_probe", (50, 50, 50, 10, 50, 50)),
                 SeedOrganism(13, 12, "wait", (50, 50, 50, 50, 50, 50)),
             ),
         ),
         "Matched pair B: identical to tendency_social except org-0001's affiliation is 10",
+    ),
+    # M11: reflection opportunities from accumulated salient records (scripted replies).
+    "reflection_probe": Fixture(
+        {},
+        LifeConfig(**_EVERY_TICK, start_energy=100, seeds=(SeedOrganism(16, 16, "walk_reflect"),)),
+        "One test organism walking a square; once 8 new salient records exist (and every "
+        "20 ticks after), its decision becomes a reflection citing two of its own records",
+    ),
+    "reflection_invalid": Fixture(
+        {},
+        LifeConfig(
+            **_EVERY_TICK, start_energy=100, seeds=(SeedOrganism(16, 16, "walk_reflect_invalid"),)
+        ),
+        "Like reflection_probe, but every reflection cites a memory id it never had: "
+        "rejected, nothing stored, the opportunity and its cooldown still used",
     ),
 }
 

@@ -515,7 +515,7 @@ def health(request: Request, sim: Runner) -> dict:
     snapshot = sim.snapshot()
     return {
         "status": "ok",
-        "milestone": "M10",
+        "milestone": "M11",
         "provider": snapshot.provider,
         "pending": snapshot.pending,
         "tick": snapshot.world.tick,

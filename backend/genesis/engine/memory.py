@@ -32,8 +32,9 @@ from genesis.domain.state import MemoryRecord, Organism, World
 from genesis.engine.perception import Observation
 
 # Fixed category salience (recall uses it as one score component).
-SALIENCE = {"observation": 1, "outcome": 2, "message": 2}
+SALIENCE = {"observation": 1, "outcome": 2, "message": 2, "reflection": 2}
 MAX_SALIENCE = max(SALIENCE.values())
+MEMORY_TAGS = ("observation", "outcome", "message", "reflection")  # category keywords
 
 
 def enabled(world: World) -> bool:
@@ -66,9 +67,10 @@ class MemoryView:
     keywords: tuple[str, ...]
     salience: int
     size: int
+    evidence: tuple[str, ...] = ()  # reflections only: the records it cited
 
     def to_dict(self) -> dict:
-        return {
+        data = {
             "id": self.id,
             "kind": self.kind,
             "ticks_ago": self.ticks_ago,
@@ -77,6 +79,9 @@ class MemoryView:
             "dy": self.dy,
             "text": self.text,
         }
+        if self.evidence:  # a reflection is shown as an interpretation with its sources
+            data["cites"] = list(self.evidence)
+        return data
 
 
 def views(world: World, organism: Organism) -> tuple[MemoryView, ...]:
@@ -93,6 +98,7 @@ def views(world: World, organism: Organism) -> tuple[MemoryView, ...]:
             m.keywords,
             m.salience,
             m.size,
+            m.evidence,
         )
         for m in world.memories_of(organism.id)
     )
@@ -186,6 +192,7 @@ def write_event(
     origin: tuple[int, int],
     outcome: WorldEvent,
     read: tuple = (),
+    reflections: tuple = (),
 ) -> WorldEvent | None:
     """Record one decision's experience for a living organism, or a logged skip.
 
@@ -196,21 +203,27 @@ def write_event(
     """
     life = world.life
     owned = world.memories_of(organism.id)
-    drafts: list[tuple[str, str, tuple[str, ...]]] = []
+    drafts: list[tuple] = []
     text, keywords = _observation_draft(observation)
     latest = next(
         (m for m in reversed(owned) if m.kind == "observation" and (m.x, m.y) == origin), None
     )
     if latest is None or latest.text != text:
         drafts.append(("observation", text, keywords))
-    if outcome.type == ACTION_ACCEPTED:
+    if outcome.type == ACTION_ACCEPTED and outcome.summary.get("action") != "reflect":
         drafts.append(("outcome", *_outcome_draft(outcome.summary)))
+    by_id = {m.id: m for m in owned}
+    for text, evidence in reflections:  # accepted interpretations (M11), with their sources
+        tags = sorted(
+            {k for e in evidence if e in by_id for k in by_id[e].keywords} - set(MEMORY_TAGS)
+        )
+        drafts.append(("reflection", text, ("reflection", *tags), tuple(evidence)))
     for item in read:  # inbox items shown at this decision (M09)
         drafts.append(("message", *_message_draft(item)))
     if not drafts:
         return None
     records = []
-    for n, (kind, text, keywords) in enumerate(drafts, start=organism.memories_written + 1):
+    for n, (kind, text, keywords, *cited) in enumerate(drafts, start=organism.memories_written + 1):
         records.append(
             MemoryRecord(
                 id=f"{organism.id}-m{n:05d}",
@@ -223,6 +236,7 @@ def write_event(
                 text=truncate(text, life.memory_record_max_bytes),
                 keywords=keywords,
                 salience=SALIENCE[kind],
+                evidence=cited[0] if cited else (),
             )
         )
     # One decision never stores more than memory can hold: later drafts (messages read)

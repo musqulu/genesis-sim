@@ -62,8 +62,14 @@ def resolution_order(organism_ids: list[str], tick: int) -> list[str]:
     return ordered[k:] + ordered[:k]
 
 
-def decision_round_event(world: World, due: list[tuple[Organism, str, Observation]]) -> WorldEvent:
-    """Charge the cognition fee and record the schedule for every due organism."""
+def decision_round_event(
+    world: World,
+    due: list[tuple[Organism, str, Observation]],
+    reflecting: frozenset[str] = frozenset(),
+) -> WorldEvent:
+    """Charge the cognition fee and record the schedule for every due organism. For those
+    whose opportunity is a reflection (schema 10), also record it: that starts the cooldown
+    whatever the reply turns out to be."""
     fee = world.life.cognition_fee
     changes, total = [], 0
     for organism, _, observation in due:
@@ -86,6 +92,12 @@ def decision_round_event(world: World, due: list[tuple[Organism, str, Observatio
                 view_total(observation),
             )
         )
+        if organism.id in reflecting:
+            changes.append(
+                OrganismChange(
+                    organism.id, "reflected_at_tick", organism.reflected_at_tick, world.tick
+                )
+            )
     return WorldEvent(
         tick=world.tick,
         phase="cognition",
@@ -95,5 +107,14 @@ def decision_round_event(world: World, due: list[tuple[Organism, str, Observatio
         summary={"due": len(due), "fee_per_decision": fee, "charged_total": total},
         organism_changes=tuple(changes),
         ledger=(LedgerEntry("energy", "cognition_fee", total),) if total else (),
-        payload={"due": [{"organism_id": o.id, "reason": r} for o, r, _ in due]},
+        payload={
+            "due": [
+                {
+                    "organism_id": o.id,
+                    "reason": r,
+                    **({"purpose": "reflect"} if o.id in reflecting else {}),
+                }
+                for o, r, _ in due
+            ]
+        },
     )

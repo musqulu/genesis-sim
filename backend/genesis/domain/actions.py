@@ -39,6 +39,20 @@ class Unparsed:
 
 
 @dataclass(frozen=True, slots=True)
+class ReflectionProposal:
+    """A parsed reflection response (M11): up to `reflection_max` interpretations, each
+    citing ids of records the organism was shown. Only the engine stores anything."""
+
+    reflections: tuple[tuple[str, tuple[str, ...]], ...]  # (text, evidence ids)
+
+    def to_dict(self) -> dict:
+        return {"reflections": [{"text": t, "evidence": list(e)} for t, e in self.reflections]}
+
+
+INVALID_EVIDENCE = "invalid_evidence"  # cites a record the organism was not shown
+
+
+@dataclass(frozen=True, slots=True)
 class Proposal:
     action: Any
     direction: Any = None

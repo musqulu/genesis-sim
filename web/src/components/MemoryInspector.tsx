@@ -7,6 +7,15 @@ interface Props {
 
 const shortId = (id: string) => id.slice(id.lastIndexOf("-") + 1);
 
+/** What kind of knowledge a record is: an engine fact, a claim by another, or the
+ * organism's own interpretation (M11). Display only. */
+const NATURE: Record<string, string> = {
+  observation: "fact",
+  outcome: "fact",
+  message: "claim",
+  reflection: "interpretation",
+};
+
 function EventLink({
   sequence,
   onSelectEvent,
@@ -48,12 +57,22 @@ function RecordRows({
         {records.map((m) => (
           <tr key={m.id}>
             <td title={m.id}>{shortId(m.id)}</td>
-            <td>{m.kind}</td>
+            <td>
+              <span className={`memory-kind ${m.kind}`}>{m.kind}</span>
+              <span className="memory-nature">{NATURE[m.kind] ?? ""}</span>
+            </td>
             <td>{m.tick}</td>
             <td>
               ({m.x}, {m.y})
             </td>
-            <td className="memory-text">{m.text}</td>
+            <td className="memory-text">
+              {m.text}
+              {m.evidence && m.evidence.length > 0 && (
+                <span className="memory-cites">
+                  cites {m.evidence.map(shortId).join(", ")}
+                </span>
+              )}
+            </td>
             <td>{m.bytes}</td>
             <td>
               {forgotten ? (

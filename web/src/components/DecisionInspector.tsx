@@ -136,9 +136,11 @@ export default function DecisionInspector({
                   <div>
                     <dt>Observation given</dt>
                     <dd>
-                      {ctx
+                      {ctx?.observation
                         ? `${ctx.observation.cells.length} cells, energy ${ctx.observation.energy}, age ${ctx.observation.age}`
-                        : "—"}
+                        : ctx?.memories
+                          ? `reflection request: ${ctx.memories.length} of its own records, energy ${ctx.status?.energy}`
+                          : "—"}
                     </dd>
                   </div>
                   {ctx?.recalled && (

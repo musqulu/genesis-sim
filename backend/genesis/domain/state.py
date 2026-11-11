@@ -65,7 +65,8 @@ class Ledger:
 
 
 DEATH_CAUSES = ("age", "starvation", "exhaustion")
-MEMORY_KINDS = ("observation", "outcome", "message")  # "message": read from the inbox (M09)
+# "message": read from the inbox (M09); "reflection": the organism's own interpretation (M11)
+MEMORY_KINDS = ("observation", "outcome", "message", "reflection")
 MESSAGE_KINDS = ("message", "transfer")  # words, or a receipt for a transfer
 MESSAGE_STATES = ("pending", "delivered")
 
@@ -132,6 +133,9 @@ class MemoryRecord:
     text: str
     keywords: tuple[str, ...]
     salience: int  # fixed per category
+    # Reflections only: ids of the owner's records cited as support (M11). The links stay
+    # in history even if the cited records are later forgotten.
+    evidence: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.id, str) or not self.id.startswith(f"{self.owner_id}-m"):
@@ -146,6 +150,12 @@ class MemoryRecord:
             isinstance(k, str) for k in self.keywords
         ):
             raise ValueError("memory keywords must be a tuple of strings")
+        if not isinstance(self.evidence, tuple) or not all(
+            isinstance(e, str) and e.startswith(f"{self.owner_id}-m") for e in self.evidence
+        ):
+            raise ValueError("evidence must cite the owner's own records")
+        if (self.kind == "reflection") != bool(self.evidence):
+            raise ValueError("a reflection, and only a reflection, cites evidence")
 
     @property
     def size(self) -> int:
@@ -155,11 +165,21 @@ class MemoryRecord:
     def to_dict(self) -> dict:
         data = asdict(self)
         data["keywords"] = list(self.keywords)
+        if self.evidence:  # absent for earlier kinds, so their records stay identical
+            data["evidence"] = list(self.evidence)
+        else:
+            del data["evidence"]
         return data
 
     @classmethod
     def from_dict(cls, data: dict) -> "MemoryRecord":
-        return cls(**{**data, "keywords": tuple(data["keywords"])})
+        return cls(
+            **{
+                **data,
+                "keywords": tuple(data["keywords"]),
+                "evidence": tuple(data.get("evidence", ())),
+            }
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -189,6 +209,8 @@ class Organism:
     messages_sent: int = 0  # schema 8: inbox items ever sent (names the next one)
     # Schema 9: starting tendencies in TENDENCIES order, 0-100, fixed for life (None: none).
     tendencies: tuple[int, ...] | None = None
+    # Schema 10: tick of its last reflection opportunity (cooldown and trigger window).
+    reflected_at_tick: int | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.id, str) or not self.id:
@@ -229,9 +251,13 @@ class Organism:
         """First tick at which the organism no longer lives (engine-private)."""
         return self.birth_tick + self.lifespan
 
-    def to_dict(self, schema: int = 9) -> dict:
+    def to_dict(self, schema: int = 10) -> dict:
         data = asdict(self)
         data["parent_ids"] = list(self.parent_ids)
+        if schema < 10:  # earlier records never reflected
+            if self.reflected_at_tick is not None:
+                raise ValueError("reflection state requires state schema 10")
+            del data["reflected_at_tick"]
         if schema < 9:  # earlier records never had tendencies
             if self.tendencies is not None:
                 raise ValueError("tendencies require state schema 9")
@@ -286,9 +312,10 @@ class World:
     # 6: M06 (+ decision cadence, cognition fee and per-organism scheduler state);
     # 7: M08 (+ memory rules and every organism's active memory records);
     # 8: M09 (+ exchange rules and every pending or unread inbox item);
-    # 9: M10 (+ tendency mode and each organism's starting tendencies).
+    # 9: M10 (+ tendency mode and each organism's starting tendencies);
+    # 10: M11 (+ reflection rules, last reflection tick, reflection records).
     # Each schema hashes exactly the fields it defines, so older runs keep their hashes.
-    schema: int = 9
+    schema: int = 10
     life: LifeConfig | None = None
     organisms: tuple[Organism, ...] = ()
     memories: tuple[MemoryRecord, ...] = ()  # active records only, ordered by id
@@ -317,6 +344,11 @@ class World:
             raise ValueError("memory requires state schema 7")
         if self.schema < 8 and (self.messages or any(o.messages_sent for o in self.organisms)):
             raise ValueError("messages require state schema 8")
+        if self.schema < 10 and (
+            any(o.reflected_at_tick is not None for o in self.organisms)
+            or any(m.kind == "reflection" for m in self.memories)
+        ):
+            raise ValueError("reflection requires state schema 10")
         if self.schema < 9 and any(o.tendencies is not None for o in self.organisms):
             raise ValueError("tendencies require state schema 9")
         if self.messages:

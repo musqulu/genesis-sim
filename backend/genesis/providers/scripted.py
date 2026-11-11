@@ -9,7 +9,7 @@ import threading
 import time
 
 from genesis.cognition.context import DecisionRequest
-from genesis.cognition.fixture_policy import CONTEXT_POLICIES, script_step
+from genesis.cognition.fixture_policy import CONTEXT_POLICIES, REFLECT_POLICIES, script_step
 from genesis.providers.base import (
     Capabilities,
     Provider,
@@ -31,6 +31,15 @@ class ScriptedProvider(Provider):
         self.calls += 1
         started = time.monotonic()
         name = self.policies[request.actor_id]
+        if request.purpose == "reflect":  # M11: scripted reflection replies
+            reply = REFLECT_POLICIES.get(name, lambda context: {"reflections": []})(request.context)
+            return ProviderResponse(
+                request.request_id,
+                request.input_hash,
+                json.dumps(reply, sort_keys=True),
+                Usage(latency_ms=int((time.monotonic() - started) * 1000)),
+                finish_reason="stop",
+            )
         if name in CONTEXT_POLICIES:  # reads only the request context, like a model would
             proposal = CONTEXT_POLICIES[name](request.context)
         else:

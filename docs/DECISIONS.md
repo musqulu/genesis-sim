@@ -1,6 +1,6 @@
 # Decision register
 
-Version: 0.5, 2026-11-11. This file records requirements and proposals. **The user approved implementation and testing of M01–M10, one milestone at a time (see the planning record).** Local MLX-LM and API-support choices remain user-directed; later milestones await approval. The [constitution](../AGENTS.md) remains unchanged. Detailed mechanisms are in [ARCHITECTURE.md](ARCHITECTURE.md), with delivery gates in [ROADMAP.md](ROADMAP.md).
+Version: 0.5, 2026-11-11. This file records requirements and proposals. **The user approved implementation and testing of M01–M11, one milestone at a time (see the planning record).** Local MLX-LM and API-support choices remain user-directed; later milestones await approval. The [constitution](../AGENTS.md) remains unchanged. Detailed mechanisms are in [ARCHITECTURE.md](ARCHITECTURE.md), with delivery gates in [ROADMAP.md](ROADMAP.md).
 
 ## Status definitions
 
@@ -46,7 +46,7 @@ M01 approval accepts P01/P02 for this milestone: Python/FastAPI and React/TypeSc
 | P07 / superseded 2026-11-08 | Original recommendation: Ollama first, MLX later | Superseded by C13/C14 and P15/P16 below. Retained as decision history only; Ollama is not a planned dependency. |
 | P08 / M08 | Bounded keyword/recency/salience retrieval before embeddings | Semantic embeddings only after an observed retrieval limitation. Low extension cost; embeddings would add model/cache/version obligations. **Accepted 2026-11-10 for M08** as `recall-v1` (unweighted recency + Jaccard keyword overlap + fixed salience, top 8 within 2,048 bytes). |
 | P09 / M09 | Same observation boundary per tick, rotated deterministic action resolution | Simultaneous auctions/reservations are more complex. Ordering is an ecological assumption and must be logged. |
-| P10 / M11 | Threshold/cooldown reflection with evidence; one bounded request | No reflection is a useful later comparison; routine reflection every tick rejected on cost/interpretability grounds. |
+| P10 / M11 | Threshold/cooldown reflection with evidence; one bounded request | No reflection is a useful later comparison; routine reflection every tick rejected on cost/interpretability grounds. **Accepted 2026-11-11 for M11** (threshold 8 salient records, cooldown 20, fee 2, ≤ 2 reflections, evidence from the 16 newest records shown). |
 | P11 / M12–13 | Asexual adjacent birth, parent-funded endowment, partial trait/memory inheritance | Sexual reproduction and spontaneous births deferred. Fresh identity and imperfect inheritance remain mandatory. |
 | P12 / M14–15 | Full state reconstruction, technical fault pauses, verified backups | No “replay” using newly sampled decisions. Corrupt history stops recovery instead of being invented. |
 | P13 / all | Use maintained infrastructure libraries directly; selectively adapt cognition ideas | Forking Generative Agents is rejected as a recommendation, not forbidden forever. Reconsider only with evidence that extraction is cheaper and constitution-compatible. |
@@ -189,4 +189,17 @@ Fixed an M09 display bug: exchange outcomes were shown as "Waited". The paired l
 - **Neutral:** 4 communication attempts, all `not_adjacent`.
 
 These are the first exchanges or attempts in any run; there were none without tendencies in the prompt. Recorded as n = 1 and descriptive; it possibly reflects the prompt mentioning affiliation at all. No defaults changed. See [M10 validation](validation/M10.md).
+
+2026-11-11: user confirmed M10 as complete and asked for a public GitHub repository and commit. Created `musqulu/genesis-sim` (public). The first commit holds M01–M10, authored with the user's GitHub noreply address at their choice. Secrets, database and reports were checked and excluded.
+
+Then implemented M11, bounded reflection: state schema 10 (rules `m11-rules-1`), prompt `reflection-v1`, schema `genesis.reflection.v1`, and fixtures `reflection_probe`/`reflection_invalid`. Choices:
+
+- Salient means salience ≥ 2.
+- Reflection salience is 2, so earlier recall scores are unchanged.
+- A request shows the newest 16 non-reflection records.
+- A reply is rejected whole if any citation is invalid.
+- Empty replies are accepted free.
+- The cooldown starts when the opportunity is scheduled.
+
+Fixed: the decision inspector would have crashed on a request without an observation. Live reflection not yet observed. See [M11 validation](validation/M11.md).
 

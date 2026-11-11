@@ -227,11 +227,15 @@ export interface DecisionRecord {
     target_tick: number;
     schema_version: string;
     input_hash: string;
+    purpose?: "decide" | "reflect"; // M11: a reflection replaces a decision
     context: {
-      observation: Observation;
-      previous_result: Record<string, unknown> | null;
-      action_schema: Record<string, unknown>;
+      // Decisions only; a reflection request carries `status` and `memories` instead.
+      observation?: Observation;
+      previous_result?: Record<string, unknown> | null;
+      action_schema?: Record<string, unknown>;
       response_format: string;
+      status?: { age: number; energy: number };
+      memories?: RecalledMemory[];
       // State schema 7 (M08): memory rules/status and the recalled records given.
       memory?: MemoryStatus;
       recalled?: RecalledMemory[];
@@ -260,6 +264,7 @@ export interface RecalledMemory {
   dx: number;
   dy: number;
   text: string;
+  cites?: string[]; // reflections: the records they cite
 }
 
 export interface MemoryStatus {
@@ -686,6 +691,7 @@ export interface MemoryRecordView {
   keywords: string[];
   salience: number;
   bytes: number;
+  evidence?: string[]; // reflections (M11): ids of the records cited
   added_sequence: number | null;
   forgotten_tick?: number;
   forgotten_sequence?: number;

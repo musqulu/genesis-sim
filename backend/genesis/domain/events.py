@@ -41,6 +41,7 @@ TRANSFER_RULE = "action.transfer.v1"
 COMMUNICATE_RULE = "action.communicate.v1"
 DELIVERY_RULE = "message.delivery.v1"
 READ_RULE = "message.read.v1"
+REFLECT_RULE = "cognition.reflect.v1"
 
 
 @dataclass(frozen=True, slots=True)

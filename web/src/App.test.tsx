@@ -1691,3 +1691,115 @@ it("compares tendencies with observed behaviour and shows an organism's profile"
     "Told org-0002: “Hello.” (−2 energy)",
   );
 });
+
+it("distinguishes facts, claims and reflections and inspects a reflection request", async () => {
+  const organism = makeOrganism();
+  const record = (id: string, kind: string, text: string, extra = {}) => ({
+    id,
+    owner_id: "org-0001",
+    kind,
+    tick: 9,
+    age: 9,
+    x: 16,
+    y: 16,
+    text,
+    keywords: [kind],
+    salience: 2,
+    bytes: text.length,
+    added_sequence: 40,
+    ...extra,
+  });
+  const reflected = makeOrganismDetail(organism);
+  reflected.latest_decision = {
+    ...reflected.latest_decision!,
+    rule_id: "cognition.reflect.v1",
+    summary: { action: "reflect", count: 1, energy_cost: 2 },
+  };
+  const detail = {
+    ...reflected,
+    memory: {
+      limits: {
+        max_records: 64,
+        max_bytes: 16384,
+        record_max_bytes: 256,
+        write_fee_per_kib: 1,
+        upkeep_per_kib: 1,
+        upkeep_interval: 10,
+        recall_max: 8,
+        recall_max_bytes: 2048,
+      },
+      active_records: 3,
+      active_bytes: 90,
+      written_total: 13,
+      active: [
+        record(
+          "org-0001-m00013",
+          "reflection",
+          "I keep walking the same square.",
+          {
+            evidence: ["org-0001-m00012", "org-0001-m00011"],
+          },
+        ),
+        record("org-0001-m00012", "outcome", "moved east; entry cost 1 energy"),
+        record("org-0001-m00011", "message", 'org-0002 said: "hi"'),
+      ],
+      forgotten: [],
+      last_recall: null,
+    },
+  };
+  const decision = makeDecision({
+    tick: 9,
+    raw_output: '{"reflections":[]}',
+    parse_status: "valid",
+    parse_error: null,
+    proposal: { reflections: [] },
+    outcome: "accepted",
+    outcome_rule: "cognition.reflect.v1",
+    outcome_reason: null,
+    request: {
+      request_id: "t00000009-org-0001",
+      target_tick: 9,
+      schema_version: "genesis.reflection.v1",
+      input_hash: "e".repeat(64),
+      purpose: "reflect",
+      context: {
+        status: { age: 9, energy: 70 },
+        memories: [
+          {
+            id: "org-0001-m00012",
+            kind: "outcome",
+            ticks_ago: 1,
+            age_then: 8,
+            dx: 0,
+            dy: 0,
+            text: "moved east; entry cost 1 energy",
+          },
+        ],
+        response_format: '{"reflections": []}',
+      },
+    },
+  });
+  const state = backend({
+    frame: makeFrame({
+      tick: 9,
+      organisms: [organism],
+      provider: recordedProvider,
+    }),
+    decisions: [decision],
+  });
+  state.organism = () => detail;
+  vi.stubGlobal("fetch", stubBackend(state));
+  render(<App />);
+  openDashboard();
+  const active = await screen.findByRole("region", { name: "Active memory" });
+  expect(active.textContent).toContain("interpretation");
+  expect(active.textContent).toContain("cites m00012, m00011");
+  expect(active.textContent).toContain("claim");
+  expect(active.textContent).toContain("fact");
+  expect(screen.getByTestId("organism-outcome").textContent).toContain(
+    "Reflected: 1 interpretation(s) (−2 energy)",
+  );
+  expect((await screen.findByTestId("decision-detail")).textContent).toContain(
+    "reflection request: 1 of its own records, energy 70",
+  );
+});

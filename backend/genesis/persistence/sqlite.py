@@ -34,7 +34,7 @@ from genesis.persistence.replay import (
 )
 
 SCHEMA_VERSION = 7  # database layout (PRAGMA user_version)
-STATE_SCHEMA = 9  # state/hash schema for newly created runs
+STATE_SCHEMA = 10  # state/hash schema for newly created runs
 MANIFEST_VERSION = 3
 SCHEMA_SQL = (Path(__file__).with_name("schema.sql")).read_text()
 
