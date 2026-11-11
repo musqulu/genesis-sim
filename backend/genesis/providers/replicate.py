@@ -15,7 +15,7 @@ from genesis.cognition.context import DecisionRequest
 from genesis.cognition.prompts import prompt_version, render
 from genesis.providers.base import ProviderError, ProviderResponse, Usage
 from genesis.providers.config import Profile
-from genesis.providers.http_chat import HttpProvider, _int, seed_for
+from genesis.providers.http_chat import HttpProvider, _int, output_cap, seed_for
 
 WAIT_S = 60  # Replicate's synchronous wait limit
 POLL_S = 1.0
@@ -84,7 +84,7 @@ class ReplicateProvider(HttpProvider):
         self.version = resolved.get("version")
         self.mapping = resolved.get("mapping") or {}
 
-    def _input(self, messages: list[dict], seed: int) -> tuple[dict, str]:
+    def _input(self, messages: list[dict], seed: int, cap: int | None = None) -> tuple[dict, str]:
         system, user = messages[0]["content"], messages[1]["content"]
         m = self.mapping
         if m.get("system_prompt"):
@@ -92,7 +92,7 @@ class ReplicateProvider(HttpProvider):
         else:
             data, placement = {"prompt": f"{system}\n\n{user}"}, "prefixed"
         for key, value in (
-            ("max_tokens", self.profile.max_output_tokens),
+            ("max_tokens", cap or self.profile.max_output_tokens),
             ("temperature", self.profile.temperature),
             ("top_p", self.profile.top_p),
             ("seed", seed if self.profile.send_seed else None),
@@ -105,7 +105,9 @@ class ReplicateProvider(HttpProvider):
     def _decide(self, request: DecisionRequest, cancel: threading.Event, calls: int):
         messages = render(request)
         seed = seed_for(request)
-        model_input, placement = self._input(messages, seed)
+        model_input, placement = self._input(
+            messages, seed, output_cap(self.profile, request.purpose)
+        )
         base = self.profile.base_url.rstrip("/")
         name, _ = _split(self.profile.model)
         timeout = self.profile.timeout_s

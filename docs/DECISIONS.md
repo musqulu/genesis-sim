@@ -203,3 +203,5 @@ Then implemented M11, bounded reflection: state schema 10 (rules `m11-rules-1`),
 
 Fixed: the decision inspector would have crashed on a request without an observation. Live reflection not yet observed. See [M11 validation](validation/M11.md).
 
+2026-11-11: first live M11 run (`c4e41be5`). 13 of 17 reflection replies were accepted with no invalid evidence; 4 were truncated at the 256-token output cap. User approved the fix ("1"): reflection requests get their own provider-level cap, `reflection_max_output_tokens` = 512, while decisions keep 256. The cap is sealed per run, with a default for earlier profiles. A re-run (`ffc3929b`) completed all 7 reflections to tick 30. No world rule changed.
+

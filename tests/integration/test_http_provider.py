@@ -458,3 +458,39 @@ def test_population_validation(api, fake_mlx, tmp_path):  # noqa: F811
         assert post(both).status_code == 422
         one = post({"population": [{"cognition": "api:fake", "organisms": 2}]}).json()
         assert one["provider"]["kind"] == "api"  # a single model is an ordinary run
+
+
+def test_reflection_requests_get_their_own_output_cap(api):
+    """M11: reflection replies cite several ids; 256 tokens truncated some in a live run."""
+    from dataclasses import replace
+
+    _, request = request_for_tick1()
+    reflect = replace(
+        request,
+        purpose="reflect",
+        context={
+            "status": {"age": 9, "energy": 50},
+            "memories": [],
+            "reflection_schema": {},
+            "response_format": '{"reflections": []}',
+        },
+    )
+    p = chat()
+    try:
+        p.decide(request, threading.Event())
+        assert api.requests[-1]["body"]["max_tokens"] == 256
+        p.decide(reflect, threading.Event())
+        assert api.requests[-1]["body"]["max_tokens"] == 512
+    finally:
+        p.close()
+    assert p.limits()["reflection_max_output_tokens"] == 512
+    from genesis.providers.mlx import MLXSettings
+
+    assert MLXSettings().output_cap("reflect") == 512 and MLXSettings().output_cap("decide") == 256
+    # Profiles sealed before the field existed fall back to the default.
+    old = {
+        k: v
+        for k, v in api_config.sealed(api_config.get_profile("fake")).items()
+        if k != "reflection_max_output_tokens"
+    }
+    assert api_config.from_sealed(old).reflection_max_output_tokens == 512

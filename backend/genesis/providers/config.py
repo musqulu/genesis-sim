@@ -51,6 +51,7 @@ class Profile:
     remote: bool = False
     timeout_s: float = 120.0
     max_output_tokens: int = 256
+    reflection_max_output_tokens: int = 512  # reflection replies (M11) cite several ids
     max_context_tokens: int = 4096
     temperature: float = 0.7
     top_p: float = 0.95
@@ -90,6 +91,7 @@ class Profile:
         for name, low, high in (
             ("timeout_s", 1, 3600),
             ("max_output_tokens", 1, 32_768),
+            ("reflection_max_output_tokens", 1, 32_768),
             ("max_context_tokens", 256, 1_048_576),
             ("temperature", 0, 2),
             ("top_p", 0, 1),

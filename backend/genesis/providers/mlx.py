@@ -43,6 +43,9 @@ WORKER_SCRIPT = Path(__file__).with_name("mlx_worker.py")
 class MLXSettings:
     max_context_tokens: int = 4096
     max_output_tokens: int = 256
+    # Reflection replies (M11) cite several record ids; 256 tokens truncated 4 of 17 in the
+    # first live run. Runs sealed before this field existed get this default.
+    reflection_max_output_tokens: int = 512
     temperature: float = 0.7
     top_p: float = 0.95
     top_k: int = 20
@@ -52,6 +55,9 @@ class MLXSettings:
 
     def to_dict(self) -> dict:
         return asdict(self)
+
+    def output_cap(self, purpose: str) -> int:
+        return self.reflection_max_output_tokens if purpose == "reflect" else self.max_output_tokens
 
 
 # -- configuration and discovery ---------------------------------------------------------------
@@ -329,7 +335,7 @@ class MLXProvider(Provider):
             "type": "generate",
             "id": nonce,
             "messages": messages,
-            "max_tokens": self.settings.max_output_tokens,
+            "max_tokens": self.settings.output_cap(request.purpose),
             "max_context_tokens": self.settings.max_context_tokens,
             "temperature": self.settings.temperature,
             "top_p": self.settings.top_p,
@@ -387,7 +393,7 @@ class MLXProvider(Provider):
                         },
                         "limits": {
                             "max_context_tokens": self.settings.max_context_tokens,
-                            "max_output_tokens": self.settings.max_output_tokens,
+                            "max_output_tokens": self.settings.output_cap(request.purpose),
                         },
                         "runtime": self._ready.get("runtime"),
                         "worker_seconds": message.get("seconds"),

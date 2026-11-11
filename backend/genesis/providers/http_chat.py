@@ -144,6 +144,7 @@ class HttpProvider(Provider):
         return {
             "max_context_tokens": self.profile.max_context_tokens,
             "max_output_tokens": self.profile.max_output_tokens,
+            "reflection_max_output_tokens": self.profile.reflection_max_output_tokens,
         }
 
     # -- contract ---------------------------------------------------------------------
@@ -229,6 +230,13 @@ class HttpProvider(Provider):
         }
 
 
+def output_cap(profile, purpose: str) -> int:
+    """Output token cap for one request: reflections (M11) get their own, larger cap."""
+    return (
+        profile.reflection_max_output_tokens if purpose == "reflect" else profile.max_output_tokens
+    )
+
+
 def seed_for(request: DecisionRequest) -> int:
     return int(request.input_hash[:8], 16)  # recorded; not a determinism guarantee
 
@@ -242,7 +250,7 @@ class HttpChatProvider(HttpProvider):
         body: dict = {
             "model": self.profile.model,
             "messages": messages,
-            "max_tokens": self.profile.max_output_tokens,
+            "max_tokens": output_cap(self.profile, request.purpose),
             "temperature": self.profile.temperature,
             "top_p": self.profile.top_p,
             "stream": False,
