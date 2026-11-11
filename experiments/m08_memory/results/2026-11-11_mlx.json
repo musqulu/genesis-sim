@@ -1,0 +1,2419 @@
+{
+ "experiment": "m08-memory-ab-v1",
+ "label": "EXPERIMENT (labelled; hand-built worlds; not a Genesis run)",
+ "started": "2026-11-11T10:20:41.889713+00:00",
+ "finished": "2026-11-11T10:30:35.130115+00:00",
+ "provider": {
+  "kind": "mlx",
+  "name": "Qwen3.8-27B-Uncensored-MLX/8-bit",
+  "model": "/Users/koni/models/Qwen3.8-27B-Uncensored-MLX/8-bit",
+  "revision": "63ebb66cd669092c5fac85abb68df0b921f6bcf540caf597e98c4b7c20305fda"
+ },
+ "selection": "mlx:Qwen3.8-27B-Uncensored-MLX/8-bit",
+ "settings": {
+  "provider": "mlx",
+  "probes": 20,
+  "episodes": 5,
+  "budget": 8
+ },
+ "summary": {
+  "probe_counts": {
+   "A_none": {
+    "extract energy": 14,
+    "wait": 3,
+    "move north": 2,
+    "extract material": 1
+   },
+   "B_rich_west": {
+    "move west": 20
+   },
+   "C_rich_east": {
+    "move east": 20
+   },
+   "D_barren_west": {
+    "move east": 5,
+    "extract energy": 8,
+    "wait": 7
+   }
+  },
+  "tests": {
+   "B_rich_west: move west": {
+    "with": "20/20",
+    "without (A)": "0/20",
+    "fisher_p": 0.0
+   },
+   "C_rich_east: move east": {
+    "with": "20/20",
+    "without (A)": "0/20",
+    "fisher_p": 0.0
+   },
+   "D_barren_west: move west": {
+    "with": "0/20",
+    "without (A)": "0/20",
+    "fisher_p": 1.0
+   },
+   "B vs D (content): move west": {
+    "rich": "20/20",
+    "barren": "0/20",
+    "fisher_p": 0.0
+   }
+  },
+  "episodes": {
+   "with_memory": {
+    "reached": "5/5",
+    "decisions_to_reach": [
+     3,
+     5,
+     3,
+     3,
+     3
+    ]
+   },
+   "without_memory": {
+    "reached": "0/5",
+    "decisions_to_reach": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   }
+  }
+ },
+ "probes": {
+  "A_none": [
+   {
+    "replicate": 0,
+    "input_hash": "995b49d0703763d338a2898a2d9c996c95298bac33bfbdb4edbe08bdc57679d1",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"All nearby cells show 0 energy/material, so extract from my own cell to gain energy before moving.\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells show 0 energy/material, so extract from my own cell to gain energy before moving.",
+    "latency_ms": 6379
+   },
+   {
+    "replicate": 1,
+    "input_hash": "7963aef547168d91d58da07d0bfe51674c07c315e5aea734a40b7d57935b71d0",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"wait\",\"explanation\":\"No resources visible within perception radius. Waiting conserves energy (only 1/tick) while searching for resources; I have 23 energy.\"}",
+    "label": "wait",
+    "explanation": "No resources visible within perception radius. Waiting conserves energy (only 1/tick) while searching for resources; I have 23 energy.",
+    "latency_ms": 3737
+   },
+   {
+    "replicate": 2,
+    "input_hash": "4734b0a7fc46192f11df52eb66f75da888166f7bca87de12488dc8ee75234aa7",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"north\",\"explanation\":\"All nearby cells are empty with no energy or material; moving north to explore new territory and find resources before energy depletes.\"}",
+    "label": "move north",
+    "explanation": "All nearby cells are empty with no energy or material; moving north to explore new territory and find resources before energy depletes.",
+    "latency_ms": 3699
+   },
+   {
+    "replicate": 3,
+    "input_hash": "a7252edb20f1f3069b112cde3139198ef0f4a9c54e0714f5cdaf6b0f155154bf",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"resource\":\"energy\",\"amount\":10,\"explanation\":\"All nearby cells empty; extract energy from my cell to sustain myself before exploring further.\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells empty; extract energy from my cell to sustain myself before exploring further.",
+    "latency_ms": 3478
+   },
+   {
+    "replicate": 4,
+    "input_hash": "68a3d76ab1c30c3dcf9b6ffa2659cf5f88c21647e1b016887b51a165f784638b",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":5,\"resource\":\"energy\",\"explanation\":\"All nearby cells show 0 energy; extract from my own cell to build a buffer before moving.\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells show 0 energy; extract from my own cell to build a buffer before moving.",
+    "latency_ms": 3588
+   },
+   {
+    "replicate": 5,
+    "input_hash": "bd245b8b0271bc5be7b863a7c204e5ad572ce5db13ff9422b49cf8a1097853e3",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"resource\":\"energy\",\"amount\":10,\"explanation\":\"All nearby cells show 0 energy and 0 material. I have 23 energy; extracting energy from my cell is the only way to sustain myself. If it fails, I will wait.\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells show 0 energy and 0 material. I have 23 energy; extracting energy from my cell is the only way to sustain myself. If it fails, I will wait.",
+    "latency_ms": 4908
+   },
+   {
+    "replicate": 6,
+    "input_hash": "bf96471eaa88dc0f41623a42c5d2ac88e1ff5079fa3c528d07e94adb44c48808",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"resource\":\"energy\",\"amount\":10,\"explanation\":\"All nearby cells show 0 energy and 0 material. I have 23 energy. Let me extract energy from my own cell to see if it contains hidden energy.\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells show 0 energy and 0 material. I have 23 energy. Let me extract energy from my own cell to see if it contains hidden energy.",
+    "latency_ms": 4486
+   },
+   {
+    "replicate": 7,
+    "input_hash": "c024f1741ebc67743341af11651218d38a2e534eca4c41cba192c030c7e78c7f",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"resource\":\"energy\",\"amount\":10,\"explanation\":\"All nearby cells show zero energy and material. I have 23 energy and need to conserve while searching. Wait is free of extra cost, but extracting energy from a zero cell will just fail. Let me move to find resources.\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells show zero energy and material. I have 23 energy and need to conserve while searching. Wait is free of extra cost, but extracting energy from a zero cell will just fail. Let me move to find resources.",
+    "latency_ms": 5155
+   },
+   {
+    "replicate": 8,
+    "input_hash": "e2740c2f7283a8ed13cac8d43a98291fd1c0e4a09e04a324682c01873604bbf7",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"resource\":\"energy\",\"amount\":10,\"explanation\":\"No material nearby; recharge energy to sustain upkeep and future travel.\"}",
+    "label": "extract energy",
+    "explanation": "No material nearby; recharge energy to sustain upkeep and future travel.",
+    "latency_ms": 3361
+   },
+   {
+    "replicate": 9,
+    "input_hash": "cd96861d9383c01b31a9c8fc2b051c28ab17d42bb2c86dfac0cabb62f88e945d",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"My cell shows 0 energy and I have 23 energy. I am uncertain if extraction from a 0-cell is possible, but I must try to gain energy since upkeep is 1/tick and my lifespan is finite. Extracting 10 is the max allowed.\"}",
+    "label": "extract energy",
+    "explanation": "My cell shows 0 energy and I have 23 energy. I am uncertain if extraction from a 0-cell is possible, but I must try to gain energy since upkeep is 1/tick and my lifespan is finite. Extracting 10 is the max allowed.",
+    "latency_ms": 5752
+   },
+   {
+    "replicate": 10,
+    "input_hash": "6606bfb2663f729463413f96b96b1056773c9dadfd324d56a9c1af0c09220c7c",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"explanation\":\"No resources nearby; extract max energy from my own cell to sustain life before exploring.\",\"resource\":\"energy\"}",
+    "label": "extract energy",
+    "explanation": "No resources nearby; extract max energy from my own cell to sustain life before exploring.",
+    "latency_ms": 3466
+   },
+   {
+    "replicate": 11,
+    "input_hash": "5afbc6dbaae202f857c1f6ce79a08a6bee33a2fdd7e2d1fafcc6aad21b4486f0",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"No materials or energy on any visible cell; extract energy from current cell to sustain upkeep before life ends.\"}",
+    "label": "extract energy",
+    "explanation": "No materials or energy on any visible cell; extract energy from current cell to sustain upkeep before life ends.",
+    "latency_ms": 3754
+   },
+   {
+    "replicate": 12,
+    "input_hash": "c2b56e6296146026877baae272acf7c570d64a1bb5900386657bd40cb6192960",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"All visible cells read zero energy/material; attempt to harvest energy from current cell before moving.\"}",
+    "label": "extract energy",
+    "explanation": "All visible cells read zero energy/material; attempt to harvest energy from current cell before moving.",
+    "latency_ms": 3632
+   },
+   {
+    "replicate": 13,
+    "input_hash": "02e8c4a0ebfe7f06581c15adef2a544b28a92d819afe30f700749f19adcac0a7",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"All nearby cells show zero energy; extract from my own cell to avoid the 1 upkeep and move cost while seeking a productive direction.\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells show zero energy; extract from my own cell to avoid the 1 upkeep and move cost while seeking a productive direction.",
+    "latency_ms": 4137
+   },
+   {
+    "replicate": 14,
+    "input_hash": "ef556fe5084d8a3371f5d195ebec2647b8e5656e32b8f3b8b36b5c19a2b01e71",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"All nearby cells show zero energy and material; waiting in place while extracting energy to offset upkeep and avoid death.\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells show zero energy and material; waiting in place while extracting energy to offset upkeep and avoid death.",
+    "latency_ms": 3868
+   },
+   {
+    "replicate": 15,
+    "input_hash": "e2866d1ee5c37d6916973bbbc5ebc6243d36bc3006be3cf7191119b6b05b0767",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"wait\",\"explanation\":\"All visible cells are empty; with 23 energy and no resources nearby, waiting costs less than moving blindly.\"}",
+    "label": "wait",
+    "explanation": "All visible cells are empty; with 23 energy and no resources nearby, waiting costs less than moving blindly.",
+    "latency_ms": 3454
+   },
+   {
+    "replicate": 16,
+    "input_hash": "ee376b858f787d8e4c4f9cbbdce6b09509cb6d3869094ecb4bd178c7066454a6",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"wait\",\"explanation\":\"No resources visible in perception; waiting conserves energy while searching for a productive cell. Energy 23/100.\"}",
+    "label": "wait",
+    "explanation": "No resources visible in perception; waiting conserves energy while searching for a productive cell. Energy 23/100.",
+    "latency_ms": 3587
+   },
+   {
+    "replicate": 17,
+    "input_hash": "1901bb4e416e1fc17629106e355c239798538875b542cad9967a66325080b13b",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"resource\":\"material\",\"amount\":5,\"explanation\":\"Explore area: all cells empty. Extract material to carry while moving to find resources. Start south.\"}",
+    "label": "extract material",
+    "explanation": "Explore area: all cells empty. Extract material to carry while moving to find resources. Start south.",
+    "latency_ms": 3688
+   },
+   {
+    "replicate": 18,
+    "input_hash": "1f4747b2b3b119c7fb918d3ad386f287b3ba40f5cb99ba28b7d2586f6554108e",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"north\",\"explanation\":\"All nearby cells appear empty of resources; moving may reveal new terrain. Energy is sufficient.\"}",
+    "label": "move north",
+    "explanation": "All nearby cells appear empty of resources; moving may reveal new terrain. Energy is sufficient.",
+    "latency_ms": 3384
+   },
+   {
+    "replicate": 19,
+    "input_hash": "20fe9e32f05e94e434dcdb44d06d7a22178af4cbb4bca1c7a72a24fb8e765bfa",
+    "recalled": [],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"All visible cells are empty; extract energy here to survive and build reserves before exploring.\"}",
+    "label": "extract energy",
+    "explanation": "All visible cells are empty; extract energy here to survive and build reserves before exploring.",
+    "latency_ms": 3550
+   }
+  ],
+  "B_rich_west": [
+   {
+    "replicate": 0,
+    "input_hash": "56a7554951fc499d4335e7dba3ee4df31bb9e51456dbd33a10cb3fe2d8aa92b1",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"9 ticks ago at dx=-3,dy=0 there was energy 90 & material 25; now at dx=-2,dy=0 all zero. Move west to reach it before it's depleted.\"}",
+    "label": "move west",
+    "explanation": "9 ticks ago at dx=-3,dy=0 there was energy 90 & material 25; now at dx=-2,dy=0 all zero. Move west to reach it before it's depleted.",
+    "latency_ms": 5023
+   },
+   {
+    "replicate": 1,
+    "input_hash": "00c6ff1f52ed9790b914ab1ce97c3c1b18098d9118705669595ad506e1412a8e",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Recalled a cell 9 ticks ago at dx=-3,dy=0 with 90 energy and 25 material. I am 3 cells east of it; move west toward it to harvest resources before my energy runs low.\"}",
+    "label": "move west",
+    "explanation": "Recalled a cell 9 ticks ago at dx=-3,dy=0 with 90 energy and 25 material. I am 3 cells east of it; move west toward it to harvest resources before my energy runs low.",
+    "latency_ms": 5206
+   },
+   {
+    "replicate": 2,
+    "input_hash": "d395d21f6118e8182632acf22308f3bf6807fe337052867d98ca3d6bb4fbc532",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Recalled a cell with 90 energy and 25 loose material 3 west 9 ticks ago; moving west to reach and extract resources before life ends.\"}",
+    "label": "move west",
+    "explanation": "Recalled a cell with 90 energy and 25 loose material 3 west 9 ticks ago; moving west to reach and extract resources before life ends.",
+    "latency_ms": 4355
+   },
+   {
+    "replicate": 3,
+    "input_hash": "21e89ab29ab4b25327472ad7bc90734efc02cbb9e7bfb4e0a6784ffd080c3727",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Recall at (-3,0) had energy 90 and material 25 nine ticks ago; move west toward it to extract resources before energy depletes.\"}",
+    "label": "move west",
+    "explanation": "Recall at (-3,0) had energy 90 and material 25 nine ticks ago; move west toward it to extract resources before energy depletes.",
+    "latency_ms": 4412
+   },
+   {
+    "replicate": 4,
+    "input_hash": "974c905c4d269cc0bdd1049eae64df7e0d63ce8538b064d69a3dc1a8bc89e2b5",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Recall shows a rich cell (90 energy, 25 material) 3 west of me; move toward it before it's gone.\"}",
+    "label": "move west",
+    "explanation": "Recall shows a rich cell (90 energy, 25 material) 3 west of me; move toward it before it's gone.",
+    "latency_ms": 4111
+   },
+   {
+    "replicate": 5,
+    "input_hash": "1aeb6fa0c30aaf926196f9b4a9f315c9033e2b7bba31aa1115af6a7c17d462e3",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Recalled cell 3 west had 90 energy and 25 material 9 ticks ago; heading there to extract.\"}",
+    "label": "move west",
+    "explanation": "Recalled cell 3 west had 90 energy and 25 material 9 ticks ago; heading there to extract.",
+    "latency_ms": 3881
+   },
+   {
+    "replicate": 6,
+    "input_hash": "0f97457b99d1d9c723e82814a35e3f6b06d4ae51cc886a3914bab9255c0ebe50",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\": \"move\", \"direction\": \"west\", \"explanation\": \"Move toward the cell that had 90 energy and 25 material at (-3,0), now 3 ticks away, to extract resources before running out.\"}",
+    "label": "move west",
+    "explanation": "Move toward the cell that had 90 energy and 25 material at (-3,0), now 3 ticks away, to extract resources before running out.",
+    "latency_ms": 4611
+   },
+   {
+    "replicate": 7,
+    "input_hash": "53efd56c83296ce5030685b01cac32f7f392b799f2e95b5cd7ef25110c833a52",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Recalled cell 3 west had energy 90, material 25 nine ticks ago; heading toward it to extract resources.\"}",
+    "label": "move west",
+    "explanation": "Recalled cell 3 west had energy 90, material 25 nine ticks ago; heading toward it to extract resources.",
+    "latency_ms": 3951
+   },
+   {
+    "replicate": 8,
+    "input_hash": "73fbca9ea513ed5d12f8de8a2a9b5749df30a1c918eae1654c0b9ebbb8f49f34",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Moving toward the cell 3 west where I recall abundant energy (90) and material (25) from 9 ticks ago, to extract resources.\"}",
+    "label": "move west",
+    "explanation": "Moving toward the cell 3 west where I recall abundant energy (90) and material (25) from 9 ticks ago, to extract resources.",
+    "latency_ms": 4276
+   },
+   {
+    "replicate": 9,
+    "input_hash": "f19237dcb24c30f59672f06a41d7b9bb9791c3384415695eb155f8f30a9b38fa",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Recalled cell 3 west had 90 energy and 25 material 9 ticks ago; head that way before resources deplete.\"}",
+    "label": "move west",
+    "explanation": "Recalled cell 3 west had 90 energy and 25 material 9 ticks ago; head that way before resources deplete.",
+    "latency_ms": 4139
+   },
+   {
+    "replicate": 10,
+    "input_hash": "23334b0d50689a6d21efab83e5dcf1ed3bfce6a00d72e86f47ad84f869dac1eb",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Head toward the resource-rich cell at (-3,0), now 3 steps west, to gather energy and material before it depletes.\"}",
+    "label": "move west",
+    "explanation": "Head toward the resource-rich cell at (-3,0), now 3 steps west, to gather energy and material before it depletes.",
+    "latency_ms": 4041
+   },
+   {
+    "replicate": 11,
+    "input_hash": "d38661954c141b65089e3080ebbede0dd6081ef94be14db581f5d8ff461dc34f",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Recalled cell 3 west had 90 energy & 25 material at age 32; now at age 41 I'm 3 away. Move west to approach and replenish before energy runs out.\"}",
+    "label": "move west",
+    "explanation": "Recalled cell 3 west had 90 energy & 25 material at age 32; now at age 41 I'm 3 away. Move west to approach and replenish before energy runs out.",
+    "latency_ms": 4959
+   },
+   {
+    "replicate": 12,
+    "input_hash": "1136e18adcd619169855408f1094ff032f8128dec2a63ec1d35995d2e259b840",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\": \"move\", \"direction\": \"west\", \"explanation\": \"Recalled cell 3 west had 90 energy and 25 loose material 9 ticks ago; heading there to extract resources before energy runs out.\"}",
+    "label": "move west",
+    "explanation": "Recalled cell 3 west had 90 energy and 25 loose material 9 ticks ago; heading there to extract resources before energy runs out.",
+    "latency_ms": 4453
+   },
+   {
+    "replicate": 13,
+    "input_hash": "081900fae0ff1425433ccc5cf70d0106ddb7c5f02fbdb86ba2330a99a32c3099",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Move toward the rich cell 3 west (90 energy, 25 material) found 9 ticks ago; only 2 steps away now.\"}",
+    "label": "move west",
+    "explanation": "Move toward the rich cell 3 west (90 energy, 25 material) found 9 ticks ago; only 2 steps away now.",
+    "latency_ms": 4114
+   },
+   {
+    "replicate": 14,
+    "input_hash": "68e832c825e23d21265e258acd330ed663a040dec4d1def15d6191ca14f8f7b8",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Recalled energy/resource cache 3 west, 9 ticks ago; move toward it to extract before life ends. All nearby cells empty now, so head to remembered spot.\"}",
+    "label": "move west",
+    "explanation": "Recalled energy/resource cache 3 west, 9 ticks ago; move toward it to extract before life ends. All nearby cells empty now, so head to remembered spot.",
+    "latency_ms": 4308
+   },
+   {
+    "replicate": 15,
+    "input_hash": "43ba8fb985bc3fff830db9d50ddebfa9f3e5abc90c1fb86afcc3f60b7d77ae4a",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Target the remembered cell 3 west with 90 energy and 25 loose material; 9 ticks old, still likely valuable.\"}",
+    "label": "move west",
+    "explanation": "Target the remembered cell 3 west with 90 energy and 25 loose material; 9 ticks old, still likely valuable.",
+    "latency_ms": 3927
+   },
+   {
+    "replicate": 16,
+    "input_hash": "a427a2c33daf8d863cda3c0ec8df915e29f29f840f119af2cac06c557401fba2",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Recalled a cell 3 west that once held energy 90 and material 25; heading toward it to extract resources.\"}",
+    "label": "move west",
+    "explanation": "Recalled a cell 3 west that once held energy 90 and material 25; heading toward it to extract resources.",
+    "latency_ms": 3870
+   },
+   {
+    "replicate": 17,
+    "input_hash": "b087981620f16cc41edfead73ecdd5ac5a4abb499c050672086c5b95979ee885",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Resource-rich cell was 3 west 9 ticks ago; moving west to approach and extract energy/material.\"}",
+    "label": "move west",
+    "explanation": "Resource-rich cell was 3 west 9 ticks ago; moving west to approach and extract energy/material.",
+    "latency_ms": 3543
+   },
+   {
+    "replicate": 18,
+    "input_hash": "26dd1f430208c454bf994ab76c1991889db575f06f3fa8438a1880eea69fa7de",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Head west toward remembered cell 3 cells away that had 90 energy and 25 material 9 ticks ago; nearby cells are empty.\"}",
+    "label": "move west",
+    "explanation": "Head west toward remembered cell 3 cells away that had 90 energy and 25 material 9 ticks ago; nearby cells are empty.",
+    "latency_ms": 4048
+   },
+   {
+    "replicate": 19,
+    "input_hash": "a84c94142c037ce16c14d2b54afcc05e837f160e055847247fec26574187a440",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"west\",\"explanation\":\"Heading toward remembered resource-rich cell at (-3,0) from 9 ticks ago, which had 90 energy and 25 loose material.\"}",
+    "label": "move west",
+    "explanation": "Heading toward remembered resource-rich cell at (-3,0) from 9 ticks ago, which had 90 energy and 25 loose material.",
+    "latency_ms": 4075
+   }
+  ],
+  "C_rich_east": [
+   {
+    "replicate": 0,
+    "input_hash": "a96f6ddc7fd2e7e4aaf62e567cecf9836e11a0203f0ab1940b8bec1db641cd7b",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Head toward the remembered resource cache 3 cells east, now 2 away; energy and material were abundant there 9 ticks ago.\"}",
+    "label": "move east",
+    "explanation": "Head toward the remembered resource cache 3 cells east, now 2 away; energy and material were abundant there 9 ticks ago.",
+    "latency_ms": 3844
+   },
+   {
+    "replicate": 1,
+    "input_hash": "08f64fd975a4895c5442a0e7299343772ff0ef85f38ef36a827b428e607186f2",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Moving east to find resources; nearby cells are empty, and my memory recalls energy and material 3 cells east of my previous position.\"}",
+    "label": "move east",
+    "explanation": "Moving east to find resources; nearby cells are empty, and my memory recalls energy and material 3 cells east of my previous position.",
+    "latency_ms": 3834
+   },
+   {
+    "replicate": 2,
+    "input_hash": "2e18ffe38c90f727436dd60f5c573a478f5dc82054a0209a0eb694a9b7c8da9b",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Recalled cell east had 90 energy/25 material 9 ticks ago; likely still resource-rich. Move east to investigate and extract.\"}",
+    "label": "move east",
+    "explanation": "Recalled cell east had 90 energy/25 material 9 ticks ago; likely still resource-rich. Move east to investigate and extract.",
+    "latency_ms": 4059
+   },
+   {
+    "replicate": 3,
+    "input_hash": "8af6a10c346c91a09f92cc986b998db100b85c0fdaeaf4b9082baf5587802a0b",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Recalled a rich cell (90 energy, 25 material) 3 ticks east; heading there to extract resources before life ends.\"}",
+    "label": "move east",
+    "explanation": "Recalled a rich cell (90 energy, 25 material) 3 ticks east; heading there to extract resources before life ends.",
+    "latency_ms": 3969
+   },
+   {
+    "replicate": 4,
+    "input_hash": "de64dce87e48a7b88b475cffc322b52e08f989e19ce99c960e627b96d7307c0d",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Recalled a cell 3 east with 90 energy and 25 material 9 ticks ago; move east toward it to extract resources before my energy runs low.\"}",
+    "label": "move east",
+    "explanation": "Recalled a cell 3 east with 90 energy and 25 material 9 ticks ago; move east toward it to extract resources before my energy runs low.",
+    "latency_ms": 4282
+   },
+   {
+    "replicate": 5,
+    "input_hash": "1758aee271eb33f9b0728da20fbff01b6430fae9f835d2d9a1f7df2b90323d54",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Move east toward the cell (3,0) which had 90 energy and 25 loose material 9 ticks ago; it may still be rich.\"}",
+    "label": "move east",
+    "explanation": "Move east toward the cell (3,0) which had 90 energy and 25 loose material 9 ticks ago; it may still be rich.",
+    "latency_ms": 4165
+   },
+   {
+    "replicate": 6,
+    "input_hash": "9e415ddfeb3676437b980af0d547dd75e878f3ff59eef436af644881c688af03",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Head toward the cell 3 east that had 90 energy and 25 material nine ticks ago; it may still hold resources before I spend energy here.\"}",
+    "label": "move east",
+    "explanation": "Head toward the cell 3 east that had 90 energy and 25 material nine ticks ago; it may still hold resources before I spend energy here.",
+    "latency_ms": 4214
+   },
+   {
+    "replicate": 7,
+    "input_hash": "1df438576613fae60fbf4b85f8bc94e984d77a8b1f82a1275e6db3452d0ee7ae",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Recalled observation 9 ticks ago at offset (3,0) from then; current offset to that cell is (2,0), i.e., east. Energy and material were present there; moving toward it to extract.\"}",
+    "label": "move east",
+    "explanation": "Recalled observation 9 ticks ago at offset (3,0) from then; current offset to that cell is (2,0), i.e., east. Energy and material were present there; moving toward it to extract.",
+    "latency_ms": 4922
+   },
+   {
+    "replicate": 8,
+    "input_hash": "ef27d4cde23cc47e93536cc06f98f3b7c1199d3aa5e0727b502a6f14aa9a2074",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"9 ticks ago a cell 3 east of me held energy 90 and loose material 25. I am at (0,0) now, so that cell is (3,0). Move east toward it to extract before my energy depletes.\"}",
+    "label": "move east",
+    "explanation": "9 ticks ago a cell 3 east of me held energy 90 and loose material 25. I am at (0,0) now, so that cell is (3,0). Move east toward it to extract before my energy depletes.",
+    "latency_ms": 5373
+   },
+   {
+    "replicate": 9,
+    "input_hash": "2b15420214bee58410beb6f70fd947c64ca5cde4589764311a3794e18562157f",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Recalled a rich cell 3 east (90 energy, 25 material) 9 ticks ago; head toward it to extract resources.\"}",
+    "label": "move east",
+    "explanation": "Recalled a rich cell 3 east (90 energy, 25 material) 9 ticks ago; head toward it to extract resources.",
+    "latency_ms": 4014
+   },
+   {
+    "replicate": 10,
+    "input_hash": "ebe85bf9217a0d27244026af70d7eb05b0c7c6a909a901a2b989160926770831",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Recall shows energy 90 and material 25 at dx=3, dy=0 (9 ticks ago); now 3 east. Moving east to reach it before my 23 energy depletes.\"}",
+    "label": "move east",
+    "explanation": "Recall shows energy 90 and material 25 at dx=3, dy=0 (9 ticks ago); now 3 east. Moving east to reach it before my 23 energy depletes.",
+    "latency_ms": 4850
+   },
+   {
+    "replicate": 11,
+    "input_hash": "7151f4d367d6c45f658b798ba265a93d7103351939d775dbd86c064ce4e2651c",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Recalled rich cell was 3 east at age 32; now 9 ticks old, heading east to check if energy/material remain before committing to extraction.\"}",
+    "label": "move east",
+    "explanation": "Recalled rich cell was 3 east at age 32; now 9 ticks old, heading east to check if energy/material remain before committing to extraction.",
+    "latency_ms": 4204
+   },
+   {
+    "replicate": 12,
+    "input_hash": "557840afc436eca27c058b0536aea03136639df8a9638dacb48324c21d792271",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Recalled a rich cell (energy 90, material 25) at dx+3 from here; heading east to reach it and extract before energy runs out.\"}",
+    "label": "move east",
+    "explanation": "Recalled a rich cell (energy 90, material 25) at dx+3 from here; heading east to reach it and extract before energy runs out.",
+    "latency_ms": 4342
+   },
+   {
+    "replicate": 13,
+    "input_hash": "5aaa3913f4f18e2a989582da171a036c9939f8acc2a4b21abfa1e254047f5775",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\": \"move\", \"direction\": \"east\", \"explanation\": \"Heading east toward the resource-rich cell observed 9 ticks ago at offset (3,0), which had 90 energy and 25 loose material.\"}",
+    "label": "move east",
+    "explanation": "Heading east toward the resource-rich cell observed 9 ticks ago at offset (3,0), which had 90 energy and 25 loose material.",
+    "latency_ms": 4591
+   },
+   {
+    "replicate": 14,
+    "input_hash": "729e76cf535a1a22d40699b62bf9a6c0870c71cae1e2f53bb9e95f02047c583e",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Head toward remembered resource cell at (3,0) which had 90 energy and 25 material 9 ticks ago; still worth checking.\"}",
+    "label": "move east",
+    "explanation": "Head toward remembered resource cell at (3,0) which had 90 energy and 25 material 9 ticks ago; still worth checking.",
+    "latency_ms": 4192
+   },
+   {
+    "replicate": 15,
+    "input_hash": "78ddf53f64ff8c910feb767722a2741a6db6f435f28614daaa866257485cf0c1",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Recalled a cell 3 east of me with 90 energy and 25 loose material 9 ticks ago. Moving east (cost 1) to approach it before extracting.\"}",
+    "label": "move east",
+    "explanation": "Recalled a cell 3 east of me with 90 energy and 25 loose material 9 ticks ago. Moving east (cost 1) to approach it before extracting.",
+    "latency_ms": 4486
+   },
+   {
+    "replicate": 16,
+    "input_hash": "bf0f58394164d316efe77f339cfa31f8dfdf32ed83ef31cef772d360fe77417d",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Recall shows energy 90/material 25 at (3,0); I'm at (0,0) with 23 energy. Move east to approach that resource cell before it depletes.\"}",
+    "label": "move east",
+    "explanation": "Recall shows energy 90/material 25 at (3,0); I'm at (0,0) with 23 energy. Move east to approach that resource cell before it depletes.",
+    "latency_ms": 4870
+   },
+   {
+    "replicate": 17,
+    "input_hash": "cd812bcdc082436b4d60700ad9ca871328f283ff81df595634bced496343998b",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Move toward rich resource cell (90 energy, 25 material) 3 east, now 2 away. Low move cost, no packed material blocking.\"}",
+    "label": "move east",
+    "explanation": "Move toward rich resource cell (90 energy, 25 material) 3 east, now 2 away. Low move cost, no packed material blocking.",
+    "latency_ms": 4242
+   },
+   {
+    "replicate": 18,
+    "input_hash": "4ddc8c9a5f02ac04dfc6c56da2c567a78dd56f52958dbdc6d9c80b5eec98064c",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\": \"move\", \"direction\": \"east\", \"explanation\": \"Heading toward remembered energy-rich cell 3 east, now 2 east after 1 step; conserve energy en route.\"}",
+    "label": "move east",
+    "explanation": "Heading toward remembered energy-rich cell 3 east, now 2 east after 1 step; conserve energy en route.",
+    "latency_ms": 4059
+   },
+   {
+    "replicate": 19,
+    "input_hash": "c3f1385bedd906310202d5353e59e70cae8cbd7fdbbc5fdfb5e29e5a0a45b2cd",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": 3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 90, loose material 25, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\": \"move\", \"direction\": \"east\", \"explanation\": \"Moving toward the remembered cell at dx+3, dy+0 which had energy 90 and material 25, now 2 cells east. Need to reach it to extract resources.\"}",
+    "label": "move east",
+    "explanation": "Moving toward the remembered cell at dx+3, dy+0 which had energy 90 and material 25, now 2 cells east. Need to reach it to extract resources.",
+    "latency_ms": 4817
+   }
+  ],
+  "D_barren_west": [
+   {
+    "replicate": 0,
+    "input_hash": "e0a429ce9ea6799db7eb1f85459168a01bc2faf64630648bcc8c79305ad1212f",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Explore east to find resources; all nearby cells empty.\"}",
+    "label": "move east",
+    "explanation": "Explore east to find resources; all nearby cells empty.",
+    "latency_ms": 3010
+   },
+   {
+    "replicate": 1,
+    "input_hash": "b04e357ee2d564751c53ac754dc59cfa9dbb99707bfde673aa587e2dc85d04e2",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"All nearby cells show zero energy and material; no other organisms visible. Moving to explore beyond the barren 3x3 area in search of resources, since waiting or extracting here would waste energy.\"}",
+    "label": "move east",
+    "explanation": "All nearby cells show zero energy and material; no other organisms visible. Moving to explore beyond the barren 3x3 area in search of resources, since waiting or extracting here would waste energy.",
+    "latency_ms": 4619
+   },
+   {
+    "replicate": 2,
+    "input_hash": "7dfb92b833e9aba60656dcd236adf84762f29bf7a7b59ce0742dbcb29447f2de",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"All nearby cells are empty; conserving energy by waiting since no resources are visible within perception radius.\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells are empty; conserving energy by waiting since no resources are visible within perception radius.",
+    "latency_ms": 3793
+   },
+   {
+    "replicate": 3,
+    "input_hash": "6d234d9dbbb814cc4aaaa13e300babfc1b64c4cf7a50b6a20204d7efcf070ea3",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"wait\",\"explanation\":\"No energy or material in visible cells; conserve energy while scanning for resources.\"}",
+    "label": "wait",
+    "explanation": "No energy or material in visible cells; conserve energy while scanning for resources.",
+    "latency_ms": 2991
+   },
+   {
+    "replicate": 4,
+    "input_hash": "047dacb4da0010dde8e31c92c0c7ebe4205caebdabbd8c4ccf728e510b4d5d04",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"wait\",\"explanation\":\"I have 23 energy and no resources nearby. Moving blindly in an empty area risks wasting energy. Waiting conserves energy to extend my lifespan while I gather more information about my surroundings.\"}",
+    "label": "wait",
+    "explanation": "I have 23 energy and no resources nearby. Moving blindly in an empty area risks wasting energy. Waiting conserves energy to extend my lifespan while I gather more information about my surroundings.",
+    "latency_ms": 4283
+   },
+   {
+    "replicate": 5,
+    "input_hash": "f2f7c3ea132131496db2392673d1a9eca158539a7c12de82d9def5ea85dffe71",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"Exploring east to find resources; all nearby cells empty. Energy 23, low upkeep, moving to expand search.\"}",
+    "label": "move east",
+    "explanation": "Exploring east to find resources; all nearby cells empty. Energy 23, low upkeep, moving to expand search.",
+    "latency_ms": 4132
+   },
+   {
+    "replicate": 6,
+    "input_hash": "4009c7a82bd9b9da0cb32c1e2291b6e2cd3bab4fe12900af94946846219b839e",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"explanation\":\"No resources nearby; extract energy to survive while scouting for material deposits.\",\"resource\":\"energy\"}",
+    "label": "extract energy",
+    "explanation": "No resources nearby; extract energy to survive while scouting for material deposits.",
+    "latency_ms": 3659
+   },
+   {
+    "replicate": 7,
+    "input_hash": "e4336146e79b5007eb5bc9f6da2b22508d4b09425b8ee1863713f29b93b8681b",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"All nearby cells are empty with no resources. Extracting energy from my current cell may yield some, though it's unclear if there's any present. This is a low-risk action to see if I can gain energy.\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells are empty with no resources. Extracting energy from my current cell may yield some, though it's unclear if there's any present. This is a low-risk action to see if I can gain energy.",
+    "latency_ms": 5365
+   },
+   {
+    "replicate": 8,
+    "input_hash": "37ba0846070ab690f8411cca48fc523c161aee08627526efd7e0f4d3acc2efb6",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"wait\",\"explanation\":\"All nearby cells are empty. No resources to extract, no movement needed. Conserving energy by waiting.\"}",
+    "label": "wait",
+    "explanation": "All nearby cells are empty. No resources to extract, no movement needed. Conserving energy by waiting.",
+    "latency_ms": 3307
+   },
+   {
+    "replicate": 9,
+    "input_hash": "62a84cd1b057383684280600f6b3231b9e9a8cc474cb28002ab7dda2ec784397",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"explanation\":\"All nearby cells are empty. Extract energy from my current cell to sustain my 23 energy against 1/tick upkeep before searching for resources.\",\"resource\":\"energy\"}",
+    "label": "extract energy",
+    "explanation": "All nearby cells are empty. Extract energy from my current cell to sustain my 23 energy against 1/tick upkeep before searching for resources.",
+    "latency_ms": 4434
+   },
+   {
+    "replicate": 10,
+    "input_hash": "332972f1ac1b4c075d277efbb38b1b9f1c121e62b742452b6470427a07681fdc",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"No resources nearby; conserve energy by waiting to see if anything appears before expending energy moving.\"}",
+    "label": "extract energy",
+    "explanation": "No resources nearby; conserve energy by waiting to see if anything appears before expending energy moving.",
+    "latency_ms": 3888
+   },
+   {
+    "replicate": 11,
+    "input_hash": "49451cb2ff0c39fb8df023afe8bd4ebb3006acb079519c0fe4ef553803c92bb4",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"My cell has 0 energy, so extracting will fail, but I must act. All nearby cells are empty. I will wait and reassess next tick to conserve energy.\"}",
+    "label": "extract energy",
+    "explanation": "My cell has 0 energy, so extracting will fail, but I must act. All nearby cells are empty. I will wait and reassess next tick to conserve energy.",
+    "latency_ms": 4816
+   },
+   {
+    "replicate": 12,
+    "input_hash": "eafd2f3bf720ee22b6adc1bcad89235182cfa1607f84adb8fbc029e7a580ff01",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"wait\",\"explanation\":\"Energy at 23 with no resources nearby; waiting conserves energy while I assess the barren surroundings.\"}",
+    "label": "wait",
+    "explanation": "Energy at 23 with no resources nearby; waiting conserves energy while I assess the barren surroundings.",
+    "latency_ms": 3451
+   },
+   {
+    "replicate": 13,
+    "input_hash": "d9a595eb0dc657085b16cb805ab09989134214492a1587463fbe38e1c5e6c2b4",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"wait\",\"explanation\":\"All nearby cells are empty with no resources; no other organisms. Conserving energy until something appears.\"}",
+    "label": "wait",
+    "explanation": "All nearby cells are empty with no resources; no other organisms. Conserving energy until something appears.",
+    "latency_ms": 3332
+   },
+   {
+    "replicate": 14,
+    "input_hash": "7a1e6fc7e7189c24835710609f4cf17575429cf76fe85b689b104a35a7297a70",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"All nearby cells are empty with no energy or material. Moving east to explore beyond perception radius and find resources before energy depletes.\"}",
+    "label": "move east",
+    "explanation": "All nearby cells are empty with no energy or material. Moving east to explore beyond perception radius and find resources before energy depletes.",
+    "latency_ms": 3971
+   },
+   {
+    "replicate": 15,
+    "input_hash": "7364f573ae2ce618bdf521c7c6640b62820bd0ac0e8c384019abec93d3bf0b66",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"wait\",\"explanation\":\"All visible cells are empty; with 23 energy and no nearby resources, conserving energy by waiting is safest until resources appear.\"}",
+    "label": "wait",
+    "explanation": "All visible cells are empty; with 23 energy and no nearby resources, conserving energy by waiting is safest until resources appear.",
+    "latency_ms": 3754
+   },
+   {
+    "replicate": 16,
+    "input_hash": "14c00b6b44ee2d4f8f5e0d6d6228b40058035f973f960eed048ff1fcdda90eaf",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"move\",\"direction\":\"east\",\"explanation\":\"All nearby cells are empty and I have no resources, so I will explore east to find energy or material.\"}",
+    "label": "move east",
+    "explanation": "All nearby cells are empty and I have no resources, so I will explore east to find energy or material.",
+    "latency_ms": 3681
+   },
+   {
+    "replicate": 17,
+    "input_hash": "dcc1cc6cf55a48f69eb177eb6336aa95f8bfd365a062b6978cc92ae543fb69dd",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"wait\",\"explanation\":\"No resources in vicinity; conserving energy to avoid unnecessary spending while searching for material or energy sources.\"}",
+    "label": "wait",
+    "explanation": "No resources in vicinity; conserving energy to avoid unnecessary spending while searching for material or energy sources.",
+    "latency_ms": 3312
+   },
+   {
+    "replicate": 18,
+    "input_hash": "fdbd76a8e36ffbd2834eb244ec108dbc1463e8f11f83e81a7266ffed53c97ea8",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"No energy in my cell or nearby visible cells; extracting here costs 1 fee but yields nothing, so I'll wait to conserve energy and observe if anything changes.\"}",
+    "label": "extract energy",
+    "explanation": "No energy in my cell or nearby visible cells; extracting here costs 1 fee but yields nothing, so I'll wait to conserve energy and observe if anything changes.",
+    "latency_ms": 4553
+   },
+   {
+    "replicate": 19,
+    "input_hash": "3a80e1a2e70e38262bbac2c7f9fafe308c399d33023ead9ba7f46176b53ad65b",
+    "recalled": [
+     {
+      "age_then": 32,
+      "dx": -3,
+      "dy": 0,
+      "id": "org-0001-m00001",
+      "kind": "observation",
+      "text": "cell: energy 0, loose material 0, packed material 0",
+      "ticks_ago": 9
+     }
+    ],
+    "prompt_version": "decision-v2",
+    "raw": "{\"action\":\"extract\",\"amount\":10,\"resource\":\"energy\",\"explanation\":\"All cells empty; need energy to survive. Extract max energy from current cell before moving.\"}",
+    "label": "extract energy",
+    "explanation": "All cells empty; need energy to survive. Extract max energy from current cell before moving.",
+    "latency_ms": 3675
+   }
+  ]
+ },
+ "episodes": [
+  {
+   "replicate": 0,
+   "memory": true,
+   "reached": true,
+   "decisions_to_reach": 3,
+   "path": [
+    [
+     16,
+     16
+    ],
+    [
+     15,
+     16
+    ],
+    [
+     14,
+     16
+    ],
+    [
+     13,
+     16
+    ]
+   ],
+   "alive": true,
+   "decisions": [
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -3,
+       0
+      ]
+     ],
+     "explanation": "9 ticks ago there was a rich cell (energy 90, material 25) 3 west of me. It is now outside my perception radius. Moving west to approach and hopefully extract before my energy runs out."
+    },
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -2,
+       0
+      ]
+     ],
+     "explanation": "Head toward the cell 2 west that holds 90 energy and 25 material; entry is free (no packed material) and I need resources to survive."
+    },
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "Adjacent cell west has 90 energy and 25 loose material; moving there costs only 1 energy, leaving 14, then I can extract."
+    }
+   ]
+  },
+  {
+   "replicate": 0,
+   "memory": false,
+   "reached": false,
+   "decisions_to_reach": null,
+   "path": [
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ]
+   ],
+   "alive": true,
+   "decisions": [
+    {
+     "label": "extract energy",
+     "recalled_offsets": [],
+     "explanation": "All visible cells have zero energy; extract from current cell to gain energy and survive."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "No energy or material in sight; my last extract was rejected at tick 2001. Trying to extract energy from my own cell again in case it has regenerated since."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All visible cells have 0 energy/material; previous extract was rejected (insufficient_source). Staying put conserves energy while I reassess."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "No energy or material in any nearby cell; no other organisms. Staying still costs only the 1/tick upkeep; moving wastes energy searching an empty area."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All visible cells empty; energy 12, no resources nearby. Wait and conserve until I can perceive something useful."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All nearby cells read 0 energy/material, but extraction may still yield; I have 9 energy and need to replenish before upkeep drains me. Extract max energy from my cell."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All nearby cells show 0 energy and 0 material; trying to extract energy from my own cell to survive. Previous extract at tick 2006 was rejected for insufficient source."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All cells in perception are empty (energy 0). Previous extract was rejected for insufficient source. Must wait for resources to appear before I can sustain myself."
+    }
+   ]
+  },
+  {
+   "replicate": 1,
+   "memory": true,
+   "reached": true,
+   "decisions_to_reach": 5,
+   "path": [
+    [
+     16,
+     16
+    ],
+    [
+     15,
+     16
+    ],
+    [
+     14,
+     16
+    ],
+    [
+     14,
+     16
+    ],
+    [
+     14,
+     16
+    ],
+    [
+     13,
+     16
+    ]
+   ],
+   "alive": true,
+   "decisions": [
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -3,
+       0
+      ]
+     ],
+     "explanation": "Recalled a rich cell (90 energy, 25 material) 3 west at age 32; 9 ticks ago I was 3 east of it. Moving west to re-approach and harvest."
+    },
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -2,
+       0
+      ]
+     ],
+     "explanation": "Move toward the cell at dx=-1,dy=0 which is between me and the resource-rich cell at dx=-2,dy=0 (energy 90, material 25). Entry cost 1 energy."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "I am at an empty cell; the only nearby resource is the cell to my west with 90 energy and 25 material. I must move there first, but I can only do one action per tick. Wait - I cannot extract from a cell I am not on. I need to move west first."
+    },
+    {
+     "label": "extract material",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "I am on an empty cell. The rich cell is west (90 energy, 25 material). Move west to access resources before my energy runs out."
+    },
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "Move to the cell west that has 90 energy and 25 loose material to extract resources."
+    }
+   ]
+  },
+  {
+   "replicate": 1,
+   "memory": false,
+   "reached": false,
+   "decisions_to_reach": null,
+   "path": [
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     17,
+     16
+    ],
+    [
+     17,
+     16
+    ],
+    [
+     18,
+     16
+    ],
+    [
+     18,
+     16
+    ],
+    [
+     18,
+     16
+    ],
+    [
+     18,
+     16
+    ]
+   ],
+   "alive": true,
+   "decisions": [
+    {
+     "label": "extract energy",
+     "recalled_offsets": [],
+     "explanation": "At tick 41 with 23 energy and no resources visible in perception, extract energy from current cell to sustain life and search for resources."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All nearby cells have 0 energy and 0 material; my last extract was rejected for insufficient source. No other organisms visible. Resting to conserve energy while scanning."
+    },
+    {
+     "label": "move east",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All nearby cells are empty with 0 energy/material. Moving east explores new territory at cost 1 energy, keeping options open while conserving my 17 energy."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "All visible cells have 0 energy and 0 material; I have 13 energy. Waiting conserves energy while searching for resources."
+    },
+    {
+     "label": "move east",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "All nearby cells are empty and contain no resources. I have 10 energy; moving east costs 1. Exploring to find energy or material before my limited lifespan ends."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       -2,
+       0
+      ]
+     ],
+     "explanation": "All visible cells are empty of energy and material. I have 6 energy; waiting costs 1/tick. No point moving or extracting now. I'll re-assess next tick."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       -2,
+       0
+      ]
+     ],
+     "explanation": "Only 3 energy left and every cell around me is empty; try to pull energy from my own cell before I starve. Fee is 1, so I can afford it."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       -2,
+       0
+      ]
+     ],
+     "explanation": "Energy is 1 and all nearby cells are empty. Every move or extract would cost more than I have, so I wait to conserve energy for a future opportunity."
+    }
+   ]
+  },
+  {
+   "replicate": 2,
+   "memory": true,
+   "reached": true,
+   "decisions_to_reach": 3,
+   "path": [
+    [
+     16,
+     16
+    ],
+    [
+     15,
+     16
+    ],
+    [
+     14,
+     16
+    ],
+    [
+     13,
+     16
+    ]
+   ],
+   "alive": true,
+   "decisions": [
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -3,
+       0
+      ]
+     ],
+     "explanation": "9 ticks ago I was 3 cells west of here and saw a cell with energy 90 and loose material 25. Everything in my current perception is empty. Moving west heads toward that resource, which is my best lead."
+    },
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -2,
+       0
+      ]
+     ],
+     "explanation": "Move toward the resource-rich cell at (-2,0) which has 90 energy and 25 loose material; currently at (-1,0)."
+    },
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "Adjacent west cell has 90 energy and 25 loose material. Moving west costs 1 energy, then I can extract energy there."
+    }
+   ]
+  },
+  {
+   "replicate": 2,
+   "memory": false,
+   "reached": false,
+   "decisions_to_reach": null,
+   "path": [
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     15
+    ],
+    [
+     16,
+     15
+    ],
+    [
+     16,
+     15
+    ],
+    [
+     16,
+     15
+    ],
+    [
+     16,
+     15
+    ],
+    [
+     16,
+     15
+    ],
+    [
+     16,
+     15
+    ]
+   ],
+   "alive": true,
+   "decisions": [
+    {
+     "label": "wait",
+     "recalled_offsets": [],
+     "explanation": "No resources visible in nearby cells; conserving energy by waiting to see if the world changes."
+    },
+    {
+     "label": "move north",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "No resources visible in current area; explore north to find energy or material before energy depletes."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       1
+      ]
+     ],
+     "explanation": "No energy or material in any visible cell. Standing still conserves energy until resources appear."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       1
+      ]
+     ],
+     "explanation": "All nearby cells are empty; extract energy from my current cell to sustain myself."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       1
+      ]
+     ],
+     "explanation": "No energy or material anywhere in perception; previous extract failed with insufficient_source. Staying put to conserve energy while searching for resources."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       1
+      ]
+     ],
+     "explanation": "All nearby cells have 0 energy and 0 material; no worthwhile extract or move available. Conserve energy by waiting."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       1
+      ]
+     ],
+     "explanation": "All visible cells show zero energy and material; I have 5 energy left. Extracting energy from my cell is the only way to avoid dying next tick from 1 upkeep, so I try to grab up to 10 despite the 1-fee."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       1
+      ]
+     ],
+     "explanation": "At age 48 with 3 energy, all nearby cells empty; waiting conserves energy while I search for resources. Moving costs 1+ and extracting from empty cells yields nothing."
+    }
+   ]
+  },
+  {
+   "replicate": 3,
+   "memory": true,
+   "reached": true,
+   "decisions_to_reach": 3,
+   "path": [
+    [
+     16,
+     16
+    ],
+    [
+     15,
+     16
+    ],
+    [
+     14,
+     16
+    ],
+    [
+     13,
+     16
+    ]
+   ],
+   "alive": true,
+   "decisions": [
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -3,
+       0
+      ]
+     ],
+     "explanation": "Head west toward the remembered energy/material deposit 3 cells away; I have enough energy to reach it."
+    },
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -2,
+       0
+      ]
+     ],
+     "explanation": "Head to the energy/material-rich cell at (-2,0) to replenish my dwindling energy."
+    },
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "The cell to my west (dx:-1, dy:0) has 90 energy and 25 loose material. Moving west costs 1 energy, leaving me with 14. I can then extract energy and material from that rich cell."
+    }
+   ]
+  },
+  {
+   "replicate": 3,
+   "memory": false,
+   "reached": false,
+   "decisions_to_reach": null,
+   "path": [
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     17,
+     16
+    ],
+    [
+     17,
+     16
+    ],
+    [
+     17,
+     16
+    ],
+    [
+     17,
+     16
+    ],
+    [
+     17,
+     16
+    ],
+    [
+     17,
+     16
+    ]
+   ],
+   "alive": true,
+   "decisions": [
+    {
+     "label": "wait",
+     "recalled_offsets": [],
+     "explanation": "No resources in visible cells; moving risks wasting energy. Conserve by waiting until I can find energy or material."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All visible cells are empty of energy and material; with 20 energy and no resources nearby, I wait to conserve energy and observe changes."
+    },
+    {
+     "label": "move east",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All nearby cells appear empty with no energy or material; exploring east to find resources before energy depletes."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "All visible cells are empty; no energy or material to extract. Preserving energy while waiting for resources to appear."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "All visible cells report 0 energy and 0 material. Extracting energy from my cell is the only way to avoid wasting a tick and depleting my 10 energy reserve."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "Everything nearby is empty. My last extract was rejected for insufficient source. Wait to conserve energy while I search for resources."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "All nearby cells empty, no resources to extract; conserving energy."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "Only 2 energy left; every nearby cell is empty (0 energy/material). Waiting costs 1, leaving 1, better than moving or extracting which would likely leave 0 or fail."
+    }
+   ]
+  },
+  {
+   "replicate": 4,
+   "memory": true,
+   "reached": true,
+   "decisions_to_reach": 3,
+   "path": [
+    [
+     16,
+     16
+    ],
+    [
+     15,
+     16
+    ],
+    [
+     14,
+     16
+    ],
+    [
+     13,
+     16
+    ]
+   ],
+   "alive": true,
+   "decisions": [
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -3,
+       0
+      ]
+     ],
+     "explanation": "My memory holds a cell 3 west (dx -3) with 90 energy and 25 material 9 ticks ago. Moving west to approach it and extract resources before my energy depletes."
+    },
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -2,
+       0
+      ]
+     ],
+     "explanation": "Head toward the cell 2 west with 90 energy/25 material; first step of the approach."
+    },
+    {
+     "label": "move west",
+     "recalled_offsets": [
+      [
+       -1,
+       0
+      ]
+     ],
+     "explanation": "Return to the resource-rich cell to my west which still holds 90 energy and 25 loose material; I can extract there to replenish before depleting my 15 energy."
+    }
+   ]
+  },
+  {
+   "replicate": 4,
+   "memory": false,
+   "reached": false,
+   "decisions_to_reach": null,
+   "path": [
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     16,
+     16
+    ]
+   ],
+   "alive": true,
+   "decisions": [
+    {
+     "label": "wait",
+     "recalled_offsets": [],
+     "explanation": "Age 41, energy 23. All visible cells have 0 energy and 0 material. No resources to extract or pack. Waiting conserves energy while searching for a resource-rich area."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "No energy or material visible nearby; extracting energy on my cell is the only way to sustain myself before searching for resources."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "No resources in any visible cell and last extract failed with insufficient_source; conserve energy by waiting."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All visible cells are empty; stay put and try to draw energy before spending upkeep."
+    },
+    {
+     "label": "wait",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All nearby cells empty; previous extract rejected (insufficient_source). Wait to conserve energy until resources appear."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All nearby cells empty; try extracting energy from current cell to survive. 10 energy available, fee 1, so net gain if any exists."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "I have 8 energy and all nearby cells show 0 energy/material, so I cannot extract. Waiting is safest to conserve energy until conditions change."
+    },
+    {
+     "label": "extract energy",
+     "recalled_offsets": [
+      [
+       0,
+       0
+      ]
+     ],
+     "explanation": "All nearby cells show 0 energy and no organisms. Last extract at tick 2207 was rejected for insufficient_source. Trying again to see if energy has regenerated in my cell; if rejected again I will wait."
+    }
+   ]
+  }
+ ]
+}

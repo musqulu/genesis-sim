@@ -1,0 +1,93 @@
+{
+ "entries": [
+  {
+   "delay_ms": 3000,
+   "input_hash": "7f1bf2b18a0e191b7fcbc56a9df5f4bae7adf18555e61f84c7c5681f42ac6efc",
+   "raw": "{\"action\": \"extract\", \"resource\": \"material\", \"amount\": 5, \"explanation\": \"Material is here; take some.\"}",
+   "request_id": "t00000001-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "b5533195f1d1a43de626b7c6e89bcb8440f3d510eaee5398a882b4b5058d542a",
+   "raw": "{\"action\": \"modify\", \"mode\": \"pack\", \"amount\": 2, \"explanation\": \"Pack two units here.\"}",
+   "request_id": "t00000005-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "19341d8cbb5df02a1bc8d795f7f22b714c09271eb30c7deddb04045848fcd9f4",
+   "raw": "{\"action\": \"move\", \"direction\": \"east\"}",
+   "request_id": "t00000009-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "5564148c16ef1640691190f00631e6781f09fe2e11adf2cd42fb1e786e2323ef",
+   "raw": "{\"action\": \"extract\", \"resource\": \"energy\", \"amount\": 4}",
+   "request_id": "t00000010-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "713c9d97a2c3e16a2f63f25ee5759d87ca737a9fb41bc3d29ecda5e7d287c373",
+   "raw": "{\"action\": \"move\", \"direction\": \"west\", \"explanation\": \"Back to the packed cell.\"}",
+   "request_id": "t00000014-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "59f69f86efdfddbbf28550698b20415d804d2bf6f41d1a6f665b795d5f397238",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Conserve energy.\"}",
+   "request_id": "t00000015-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "c961588013debcffcbacb1c826906a1b6a24a219bdf55bb1dd8e5244076219d6",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Conserve energy.\"}",
+   "request_id": "t00000019-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "b2cdc843fa3c9a802abb349cd637c272addf96fcc4deb0dba08e34ced96ca04b",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Conserve energy.\"}",
+   "request_id": "t00000020-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "eea129c315fcf24fb71f08a98ab64690d6ac7eb200b5e0c05629964898277e07",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Conserve energy.\"}",
+   "request_id": "t00000024-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "6fbc28b0e6c30c9923275b9e7ab68c727c9bea08aca25305899ab14a600202de",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Conserve energy.\"}",
+   "request_id": "t00000028-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "06c8c6f1c1b8d2ee9bf2aafd3366e6a2838f7dd0381e8c9ff3a6c58f10c5b917",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Conserve energy.\"}",
+   "request_id": "t00000030-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "384780b4e26094e95b5b0ab6ec902fedf72c09c63e0c71e05d8627d2cb5c5b4c",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Conserve energy.\"}",
+   "request_id": "t00000034-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "7e09c564f15e741f966bbaf5af5d96a5394eb7c6a9790436d263eda3582a9095",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Conserve energy.\"}",
+   "request_id": "t00000038-org-0001"
+  },
+  {
+   "delay_ms": 3000,
+   "input_hash": "6a5e35844411c8a9773b352ecfbb6df1eb520f9b741a98b77357365516dfeee8",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Conserve energy.\"}",
+   "request_id": "t00000040-org-0001"
+  }
+ ],
+ "fixture": "recorded_delayed",
+ "format": 1,
+ "name": "recorded_delayed",
+ "seed": 42,
+ "sha256": "f5af6c52a4b8931c2af3b4bc9ed9449baa8755ba6fa42b15bc929a09da7bfa27"
+}

@@ -1,0 +1,39 @@
+# Genesis API connection profiles (M07B).
+#
+# Each [profiles.<id>] appears in the Model selector as "API · …" and is used as
+# cognition "api:<id>". This file must never contain a key: `api_key_env` names the
+# environment variable that holds it, set in the shell that starts the backend.
+# A run seals its profile (without the key) when it is created; editing this file later
+# does not change existing runs. Override the file location with GENESIS_PROVIDERS_FILE.
+#
+# Optional settings (defaults): timeout_s 120, max_output_tokens 256,
+# max_context_tokens 4096, temperature 0.7, top_p 0.95, send_seed true,
+# structured_output "none" ("json_object"/"json_schema" only if the endpoint supports it),
+# max_requests 2000 and max_total_tokens 4000000 per run (a technical budget: reaching it
+# pauses the run; it never changes the world), extra_body {} (endpoint-specific request
+# fields, sent as given and recorded; it cannot override the prompt, model or limits).
+
+# Your own vllm-mlx server on this Mac (OpenAI-compatible). Start it on port 8090
+# (Genesis uses 8000), for example:
+#   HF_HUB_OFFLINE=1 ~/models/vllm-mlx/.venv/bin/vllm-mlx serve \
+#     ~/models/Qwen3.8-27B-Uncensored-MLX/8-bit \
+#     --served-model-name Qwen3.8-27B-Uncensored-MLX/8-bit --port 8090
+[profiles.local-vllm]
+protocol = "openai_chat"
+base_url = "http://127.0.0.1:8090/v1"
+model = "Qwen3.8-27B-Uncensored-MLX/8-bit"   # the server's --served-model-name
+label = "vllm-mlx on this Mac"
+# Qwen3 thinks aloud by default; M07A's local worker also disables thinking.
+extra_body = { chat_template_kwargs = { enable_thinking = false } }
+
+# Replicate (its own predictions API). Set `model` to "owner/name" (optionally
+# "owner/name:version") of a text model with a `prompt` input, and before starting the
+# backend run:  export REPLICATE_API_TOKEN=...
+[profiles.replicate]
+protocol = "replicate"
+base_url = "https://api.replicate.com/v1"
+model = "deepseek-ai/deepseek-v3"
+api_key_env = "REPLICATE_API_TOKEN"
+label = "Replicate"
+remote = true
+max_requests = 400   # about $0.60 at ~$1.45 per million tokens (2026-11 listing)

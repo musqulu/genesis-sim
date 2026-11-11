@@ -1,0 +1,81 @@
+{
+ "entries": [
+  {
+   "delay_ms": 0,
+   "input_hash": "ab0da1978d392c223bb1b610c883729a8a4e5290c06457190cdb97fd58385d56",
+   "raw": "{\"action\": \"move\", \"direction\": ",
+   "request_id": "t00000001-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "e3fe2b99272fbc38f46e331040011915bebf743c9ee7e4cee78ccacbb11ad057",
+   "raw": "{\"action\": \"extract\", \"resource\": \"material\", \"amount\": \"ten\"}",
+   "request_id": "t00000005-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "9c0151dc375519400ce7b5ec0d259af2dd02eedb7848113e3e76f0d1134f95e4",
+   "raw": "{\"action\": \"extract\", \"resource\": \"material\", \"amount\": 99}",
+   "request_id": "t00000009-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "40afed66a5c55bcc2974b05ec21f0654a19d30192fb079f696b2110e3ac399c6",
+   "raw": "{\"action\": \"teleport\", \"x\": 3, \"y\": 4}",
+   "request_id": "t00000013-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "b7cb2b649106a6111e515493eed1bf6d425e57e54275c2ff9cd50c75d3f5f360",
+   "raw": "{\"action\": \"wait\", \"mood\": \"calm\"}",
+   "request_id": "t00000017-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "4d034b6cb250af3ea7a24326059bf58158ba6030e150609a55ec07a93bef62f4",
+   "raw": "",
+   "request_id": "t00000021-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "0cd745c955dcf61f013f2982b6ade5a69563fab818a340c8392d9b006993df7c",
+   "raw": "{\"action\": \"move\", \"direction\": \"north\"}",
+   "request_id": "t00000025-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "dedbfbbd0de4065c00696d0e5b3f84f35ee3d07e9ceeacc6ce70cfa8263fa980",
+   "raw": "[{\"action\": \"wait\"}]",
+   "request_id": "t00000029-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "ea7f852e4b2ea54ec541eaf5dfd95450414c640e896fa3a71361018273364431",
+   "raw": "{\"action\": \"wait\", \"action\": \"move\", \"direction\": \"east\"}",
+   "request_id": "t00000033-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "cc321c1a98cf9ae07073416f43fd533202f5cf755959b7f528fb4ac75e0e63d8",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Nothing valid to do.\"}",
+   "request_id": "t00000037-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "0b65e2c655f396f69882f5a089447a4bc71b9f325fcaf635fec6929524ad888c",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Nothing valid to do.\"}",
+   "request_id": "t00000041-org-0001"
+  },
+  {
+   "delay_ms": 0,
+   "input_hash": "8a68312f15157bc13363781d3dd659cb8bf8adc90c6abbb747f1171dc744a5f0",
+   "raw": "{\"action\": \"wait\", \"explanation\": \"Nothing valid to do.\"}",
+   "request_id": "t00000045-org-0001"
+  }
+ ],
+ "fixture": "recorded_invalid",
+ "format": 1,
+ "name": "recorded_invalid",
+ "seed": 42,
+ "sha256": "82b0390933821ff40f9838b674013f6f659a479dcb9fe88da30de8b6549aec67"
+}
