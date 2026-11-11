@@ -217,3 +217,5 @@ Choices:
 
 The `birth_pair` fixture covers the valid and invalid paths. A live trial waits for the user. See [M12 validation](validation/M12.md).
 
+2026-11-11: first live M12 trial (`c366ebba`, 10 local Qwen organisms, 16 × 16, seed 42, seeded tendencies, paused by the user at tick 76). It recorded **two autonomous births** (org-0003 → org-0011 at tick 20; org-0007 → org-0012 at tick 64), both accepted on the first attempt, with logged partial inheritance. These are the first second-generation organisms in the project. 5 starvations; no rules changed.
+
