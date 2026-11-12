@@ -124,3 +124,12 @@ def test_new_runs_can_use_a_smaller_square_map(database):
     assert len({(s.x, s.y) for s in placed}) == 10
     assert all(0 <= s.x < 16 and 0 <= s.y < 16 for s in placed)
     assert live_seeds(42, 3) == live_seeds(42, 3, 32)  # 32 x 32 placements are unchanged
+
+
+def test_new_runs_can_set_energy_inflow(database):
+    with TestClient(create_app(database, dev_fixtures=True)) as client:
+        frame = client.post("/api/runs", json={"seed": 42, "size": 20, "inflow_amount": 3}).json()
+        assert frame["config"]["inflow_amount"] == 3 and frame["config"]["width"] == 20
+        assert client.post("/api/runs", json={"seed": 1, "inflow_amount": 101}).status_code == 422
+        fixture = {"seed": 1, "fixture": "exchange_pair", "inflow_amount": 2}
+        assert client.post("/api/runs", json=fixture).status_code == 422

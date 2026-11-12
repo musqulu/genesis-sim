@@ -41,7 +41,7 @@ def test_organism_count_is_validated(fake_mlx, tmp_path):  # noqa: F811
     with TestClient(create_app(tmp_path / "v.sqlite3")) as client:
         for body in (
             {"organisms": 0, "cognition": f"mlx:{MODEL}"},
-            {"organisms": 13, "cognition": f"mlx:{MODEL}"},
+            {"organisms": 17, "cognition": f"mlx:{MODEL}"},
             {"organisms": 3},
         ):
             assert client.post("/api/runs", json=body).status_code == 422

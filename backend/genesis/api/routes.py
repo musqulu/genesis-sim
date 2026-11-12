@@ -35,6 +35,7 @@ from genesis.runtime.commands import CommandError, Pause, Resume, SetSpeed, Star
 from genesis.runtime.runner import SimulationRunner
 
 router = APIRouter(prefix="/api")
+MAX_ORGANISMS = 16  # seed population cap (the constitution suggests 8-12; 16 at user request)
 
 
 def runner(request: Request) -> SimulationRunner:
@@ -58,8 +59,8 @@ def get_world(request: Request, sim: Runner) -> GridFrame:
 def create_run(body: CreateRun, request: Request, sim: Runner) -> GridFrame:
     if body.fixture is not None and body.fixture not in request.app.state.dev_fixtures:
         raise HTTPException(status_code=422, detail="Fixtures are available only in dev mode")
-    if body.fixture is not None and body.size != 32:
-        raise HTTPException(status_code=422, detail="Fixtures keep their own 32 x 32 map")
+    if body.fixture is not None and (body.size != 32 or body.inflow_amount is not None):
+        raise HTTPException(status_code=422, detail="Fixtures keep their own map and inflow")
     if body.population is not None:
         return frame_of(request, sim.create_run(*mixed_run(body)))
     if body.cognition is None and body.organisms != 1:
@@ -81,12 +82,15 @@ def create_run(body: CreateRun, request: Request, sim: Runner) -> GridFrame:
             seeds=live_seeds(body.seed, body.organisms, body.size),
             tendency_mode=body.tendencies,
         )
-        config = WorldConfig.for_run(body.seed, size=body.size)
+        config = WorldConfig.for_run(body.seed, size=body.size, inflow_amount=body.inflow_amount)
         return frame_of(request, sim.create_run(config, life, profile))
     return frame_of(
         request,
         sim.create_run(
-            WorldConfig.for_run(body.seed, body.fixture, body.size), life_for_run(body.fixture)
+            WorldConfig.for_run(
+                body.seed, body.fixture, body.size, inflow_amount=body.inflow_amount
+            ),
+            life_for_run(body.fixture),
         ),
     )
 
@@ -111,8 +115,8 @@ def mixed_run(body: CreateRun) -> tuple[WorldConfig, LifeConfig, dict]:
             status_code=422, detail="Choose either a population or a single model/fixture"
         )
     total = sum(entry.organisms for entry in body.population)
-    if total > 12:
-        raise HTTPException(status_code=422, detail="At most 12 organisms in total")
+    if total > MAX_ORGANISMS:
+        raise HTTPException(status_code=422, detail=f"At most {MAX_ORGANISMS} organisms in total")
     cognitions = [entry.cognition for entry in body.population]
     if len(set(cognitions)) != len(cognitions):
         raise HTTPException(status_code=422, detail="List each model once in a population")
@@ -120,7 +124,7 @@ def mixed_run(body: CreateRun) -> tuple[WorldConfig, LifeConfig, dict]:
     if len(cognitions) == 1:  # one model: an ordinary run
         profile = profile_for(cognitions[0])
         return (
-            WorldConfig.for_run(body.seed, size=body.size),
+            WorldConfig.for_run(body.seed, size=body.size, inflow_amount=body.inflow_amount),
             LifeConfig(provider=cognitions[0], seeds=seeds, tendency_mode=body.tendencies),
             profile,
         )
@@ -138,7 +142,7 @@ def mixed_run(body: CreateRun) -> tuple[WorldConfig, LifeConfig, dict]:
             assignment[f"org-{n:04d}"] = index
     profile = {"kind": "mixed", "members": members, "assignment": assignment}
     return (
-        WorldConfig.for_run(body.seed, size=body.size),
+        WorldConfig.for_run(body.seed, size=body.size, inflow_amount=body.inflow_amount),
         LifeConfig(provider="mixed", seeds=seeds, tendency_mode=body.tendencies),
         profile,
     )

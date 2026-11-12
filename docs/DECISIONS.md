@@ -244,3 +244,5 @@ A live trial waits for the user. See [M13 validation](validation/M13.md).
 
 No world rule changed. See [the benchmark README](../experiments/model_bench/README.md).
 
+2026-11-12: user asked for a mixed-model test with 15 organisms on a smaller map with enough resources. The seed-population cap was raised from 12 to 16. The constitution suggests 8–12; 15 is the user's explicit choice for this experiment. New runs gained an `inflow_amount` setting (energy per cell per inflow tick, sealed in the manifest; fixtures keep theirs) and a 20 × 20 map option. No rules changed.
+

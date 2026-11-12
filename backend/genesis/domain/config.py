@@ -599,13 +599,21 @@ class WorldConfig:
             raise ValueError(f"unknown fixture: {self.fixture!r}")
 
     @classmethod
-    def for_run(cls, seed: int, fixture: str | None = None, size: int = 32) -> "WorldConfig":
-        """A new run's world. `size` makes a square map (fixtures keep their own layout)."""
+    def for_run(
+        cls,
+        seed: int,
+        fixture: str | None = None,
+        size: int = 32,
+        inflow_amount: int | None = None,
+    ) -> "WorldConfig":
+        """A new run's world. `size` makes a square map and `inflow_amount` sets the energy
+        added per cell on each inflow tick (fixtures keep their own layout and inflow)."""
         if fixture is not None and fixture not in FIXTURES:
             raise ValueError(f"unknown fixture: {fixture!r}")
         if fixture is not None:
             return cls(seed=seed, fixture=fixture, **FIXTURES[fixture].world)
-        return cls(seed=seed, width=size, height=size)
+        extra = {} if inflow_amount is None else {"inflow_amount": inflow_amount}
+        return cls(seed=seed, width=size, height=size, **extra)
 
 
 def life_for_run(fixture: str | None) -> LifeConfig:

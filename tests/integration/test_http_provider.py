@@ -446,10 +446,10 @@ def test_mixed_population_each_organism_keeps_its_own_model(api, fake_mlx, tmp_p
 def test_population_validation(api, fake_mlx, tmp_path):  # noqa: F811
     with TestClient(create_app(tmp_path / "v.sqlite3")) as client:
         post = lambda body: client.post("/api/runs", json={"seed": 1, **body})  # noqa: E731
-        assert post({"population": [{"cognition": "api:fake", "organisms": 13}]}).status_code == 422
+        assert post({"population": [{"cognition": "api:fake", "organisms": 17}]}).status_code == 422
         too_many = [
-            {"cognition": "api:fake", "organisms": 7},
-            {"cognition": f"mlx:{MODEL}", "organisms": 6},
+            {"cognition": "api:fake", "organisms": 9},
+            {"cognition": f"mlx:{MODEL}", "organisms": 8},
         ]
         assert post({"population": too_many}).status_code == 422
         twice = [{"cognition": "api:fake", "organisms": 1}] * 2

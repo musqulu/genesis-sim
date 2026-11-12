@@ -19,7 +19,7 @@ export interface NewRunSettings {
   tendencies: "seeded" | "neutral"; // starting tendencies of live organisms
 }
 
-const MAP_SIZES = ["32", "24", "16", "12", "8"];
+const MAP_SIZES = ["32", "24", "20", "16", "12", "8"];
 
 interface Props {
   frame: GridFrame;
@@ -38,7 +38,7 @@ interface Props {
   health: ReactNode;
 }
 
-export const MAX_ORGANISMS = 12;
+export const MAX_ORGANISMS = 16;
 
 /** Always-visible run controls and new-run setup below the stage. */
 export default function ControlBar({

@@ -1088,7 +1088,7 @@ it("creates a multi-organism run with the chosen model and count", async () => {
     target: { value: "mlx:qwen" },
   });
   fireEvent.change(screen.getByLabelText("Organisms"), {
-    target: { value: "13" },
+    target: { value: "17" },
   });
   expect(
     (screen.getByRole("button", { name: /New run/ }) as HTMLButtonElement)

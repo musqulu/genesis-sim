@@ -352,7 +352,7 @@ class OrganismDetail(StrictRecord):
 
 class PopulationEntry(StrictRecord):
     cognition: str = Field(max_length=300)
-    organisms: int = Field(ge=1, le=12)
+    organisms: int = Field(ge=1, le=16)
 
 
 class CreateRun(StrictRecord):
@@ -361,7 +361,7 @@ class CreateRun(StrictRecord):
     # "mlx:<model id>": one organism whose decisions come from a local MLX-LM model.
     cognition: str | None = Field(default=None, max_length=300)
     # How many organisms share the chosen model (one resident model, isolated contexts).
-    organisms: int = Field(default=1, ge=1, le=12)
+    organisms: int = Field(default=1, ge=1, le=16)
     # A mixed-model population instead of `cognition`: each entry gives a model and how
     # many organisms use it (organisms are numbered in this order).
     population: list[PopulationEntry] | None = Field(default=None, min_length=1, max_length=4)
@@ -370,6 +370,9 @@ class CreateRun(StrictRecord):
     # Starting tendencies of live organisms: drawn from the seed, or all 50 (the paired
     # control: the same world, placements and lifespans, only the tendencies differ).
     tendencies: Literal["seeded", "neutral"] = "seeded"
+    # Energy added per cell on each inflow tick (default 1; 0 = none). An environment
+    # parameter sealed in the run manifest; fixtures keep their own.
+    inflow_amount: int | None = Field(default=None, ge=0, le=100)
 
 
 class ControlBody(StrictRecord):
