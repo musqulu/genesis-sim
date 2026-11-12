@@ -37,6 +37,7 @@ import CanvasGrid, { EXCHANGE_FADE } from "./renderers/CanvasGrid";
 import ExchangeFeed from "./components/ExchangeFeed";
 import PopulationPanel from "./components/PopulationPanel";
 import GenealogyPanel from "./components/GenealogyPanel";
+import HealthPanel from "./components/HealthPanel";
 import CellInspector from "./components/CellInspector";
 import DecisionInspector from "./components/DecisionInspector";
 import EventList from "./components/EventList";
@@ -49,7 +50,12 @@ import OrganismTooltip from "./components/OrganismTooltip";
 import SummaryModal from "./components/SummaryModal";
 import TickPicker from "./components/TickPicker";
 
-type Connection = "connecting" | "connected" | "disconnected" | "incompatible";
+type Connection =
+  | "connecting"
+  | "connected"
+  | "disconnected"
+  | "incompatible"
+  | "storage_error"; // M15 safe mode: recorded history failed verification
 
 export const POLL_RUNNING_MS = 250;
 export const POLL_IDLE_MS = 1000;
@@ -151,6 +157,9 @@ export default function App() {
       if (caught instanceof IncompatibleBackend) {
         setVersionError(caught.message);
         setConnection("incompatible");
+      } else if (caught instanceof ApiError && caught.status === 503) {
+        setVersionError(caught.message);
+        setConnection("storage_error");
       } else setConnection("disconnected");
     }
   }, []);
@@ -644,7 +653,9 @@ export default function App() {
                 ? "Connecting"
                 : connection === "incompatible"
                   ? "Version mismatch"
-                  : "Disconnected"}
+                  : connection === "storage_error"
+                    ? "Storage needs attention"
+                    : "Disconnected"}
           </span>
           <button
             className="button small"
@@ -666,6 +677,23 @@ export default function App() {
       </header>
 
       <main className="stage-main">
+        {connection === "storage_error" && (
+          <div
+            className="connection-alert"
+            role="alert"
+            data-testid="storage-alert"
+          >
+            <div>
+              <strong>Recorded history needs attention</strong>
+              <p>
+                {versionError} The backend started in safe mode: it changed
+                nothing, repaired nothing and replaced nothing. Restore a
+                verified backup to a separate path, or investigate the database,
+                then restart the backend.
+              </p>
+            </div>
+          </div>
+        )}
         {connection === "incompatible" && (
           <div
             className="connection-alert"
@@ -707,7 +735,9 @@ export default function App() {
           <section className="empty-state panel">
             <div className="empty-grid-mark" aria-hidden="true" />
             <h2>
-              {connection === "disconnected" || connection === "incompatible"
+              {connection === "disconnected" ||
+              connection === "incompatible" ||
+              connection === "storage_error"
                 ? "Waiting for the world"
                 : "Loading the world"}
             </h2>
@@ -882,6 +912,9 @@ export default function App() {
                 onSeek={(tick, source) => void seek(tick, source)}
                 onReturnLive={() => setHistory(null)}
                 moments={moments}
+              />
+              <HealthPanel
+                refreshKey={`${frame.run_id}:${Math.floor(frame.tick / 5)}:${frame.status}:${frame.last_error ?? ""}`}
               />
               <GenealogyPanel
                 organisms={view.organisms}

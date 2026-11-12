@@ -8,7 +8,6 @@ import pytest
 from fastapi.testclient import TestClient
 from genesis.api.app import create_app
 from genesis.api.schemas import GridFrame
-from genesis.persistence.sqlite import StoreError
 
 
 @pytest.fixture
@@ -45,7 +44,7 @@ def test_world_api_contract_and_inspection_match(database):
             assert inspected["state_hash"] == frame["state_hash"]
         assert client.get("/api/world").json() == frame  # reads change nothing
         health = client.get("/api/health").json()
-        assert health["milestone"] == "M13" and health["run_id"] == frame["run_id"]
+        assert health["milestone"] == "M15" and health["run_id"] == frame["run_id"]
 
 
 @pytest.mark.parametrize("path", ["-1/0", "0/-1", "32/0", "0/32", "99999/99999"])
@@ -235,8 +234,19 @@ def test_corrupt_saved_world_is_not_silently_replaced(database):
         pass
     with closing(sqlite3.connect(database)) as db, db:
         db.execute("UPDATE cells SET energy = energy + 1 WHERE idx = 0")
-    with pytest.raises(StoreError), TestClient(create_app(database)):
-        pass
+    # M15 safe mode: the server starts, reports the failure and changes nothing.
+    with TestClient(create_app(database)) as client:
+        health = client.get("/api/health").json()
+        assert health["status"] == "storage_error"
+        assert "disagrees with recorded history" in health["detail"]
+        world = client.get("/api/world")
+        assert world.status_code == 503 and "failed verification" in world.json()["detail"]
+        assert (
+            client.post(
+                "/api/control", json={"command": "start", "command_id": "safe-000001"}
+            ).status_code
+            == 503
+        )
     with closing(sqlite3.connect(database)) as db:
         assert db.execute("SELECT COUNT(*) FROM run_manifest").fetchone()[0] == 1
 
@@ -246,8 +256,12 @@ def test_missing_active_reference_preserves_existing_runs(database):
         pass
     with closing(sqlite3.connect(database)) as db, db:
         db.execute("DELETE FROM active_sim_run")
-    with pytest.raises(StoreError), TestClient(create_app(database)):
-        pass
+    with TestClient(create_app(database)) as client:  # safe mode, nothing replaced
+        assert client.get("/api/health").json()["status"] == "storage_error"
+        assert client.get("/api/world").status_code == 503
+    with closing(sqlite3.connect(database)) as db:
+        assert db.execute("SELECT COUNT(*) FROM run_manifest").fetchone()[0] == 1
+        assert db.execute("SELECT COUNT(*) FROM active_sim_run").fetchone()[0] == 0
 
 
 # -- M03: history, snapshots, restart ------------------------------------------------------
@@ -347,4 +361,4 @@ def test_pause_and_shutdown_write_snapshots_and_restart_restores(database):
         reasons = {s["tick"]: s["reason"] for s in client.get("/api/snapshots").json()["snapshots"]}
         assert reasons[last["tick"]] == "close" and reasons[0] == "initial"
         health = client.get("/api/health").json()
-        assert health["milestone"] == "M13" and health["restored_from"]["source"] == "snapshot"
+        assert health["milestone"] == "M15" and health["restored_from"]["source"] == "snapshot"

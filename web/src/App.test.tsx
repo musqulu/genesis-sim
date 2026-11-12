@@ -2089,3 +2089,108 @@ it("opens the decision behind an event from the event list", async () => {
     within(list).getAllByRole("button")[1].getAttribute("aria-pressed"),
   ).toBe("true");
 });
+
+it("shows a safe-mode storage alert rather than a disconnection when history fails verification", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => ({
+      ok: false,
+      status: 503,
+      json: async () => ({
+        detail:
+          "Recorded history failed verification at startup; nothing was changed. Committed cell state disagrees with recorded history.",
+      }),
+    })),
+  );
+  render(<App />);
+  const alert = await screen.findByTestId("storage-alert");
+  expect(alert.textContent).toContain("failed verification");
+  expect(alert.textContent).toContain("changed nothing");
+  expect(screen.queryByText("Disconnected")).toBeNull();
+});
+
+it("shows technical health and creates a verified backup", async () => {
+  const report = {
+    status: "ok",
+    problems: [],
+    live_tick: 8,
+    durable_tick: 8,
+    running: false,
+    last_error: null,
+    pending: null,
+    queue: { capacity: 4, max_depth_seen: 1 },
+    provider: { status: "ready" },
+    disk: {
+      free_bytes: 500 * 2 ** 30,
+      total_bytes: 1000 * 2 ** 30,
+      min_free_bytes: 512 * 2 ** 20,
+      ok: true,
+      database_bytes: 64 * 2 ** 20,
+    },
+    invariants: { ledger_balanced: true },
+    metrics: {
+      decisions: 12,
+      unparsed: 1,
+      latency_ms_median: 4100,
+      provider_failures: 0,
+    },
+    technical_log: [
+      {
+        at: "2026-11-12T10:00:00Z",
+        kind: "loaded",
+        subject: "tick 8",
+        detail: "restored from snapshot @ tick 0 + 8 replayed ticks",
+      },
+    ],
+  };
+  const state = backend({ frame: makeFrame({ tick: 8 }) });
+  const base = stubBackend(state);
+  const backups: unknown[] = [];
+  const mock = vi.fn(async (url: string, init: RequestInit = {}) => {
+    const reply = (body: unknown, status = 200) => ({
+      ok: status < 400,
+      status,
+      json: async () => body,
+    });
+    if (url === "/api/health") return reply({ status: "ok", report });
+    if (url === "/api/backups" && init.method === "POST") {
+      backups.push({
+        name: "genesis-2026-11-12T10-00-00Z.sqlite3",
+        bytes: 64 * 2 ** 20,
+        created_at: "x",
+        verified_ok: true,
+        runs: 3,
+      });
+      return reply(
+        {
+          ok: true,
+          integrity: "ok",
+          runs: [{ run_id: "a", tick: 8, hash_ok: true }],
+          failures: [],
+          path: "p",
+        },
+        201,
+      );
+    }
+    if (url === "/api/backups") return reply({ backups });
+    return base(url, init);
+  });
+  vi.stubGlobal("fetch", mock);
+  render(<App />);
+  openDashboard();
+  expect((await screen.findByTestId("health-status")).textContent).toBe("OK");
+  expect(screen.getByTestId("health-report").textContent).toContain("8 / 8");
+  expect(screen.getByTestId("health-report").textContent).toContain(
+    "12 decisions · 1 unparsed · median 4.10 s",
+  );
+  expect(
+    screen.getByRole("list", { name: "Technical notes" }).textContent,
+  ).toContain("loaded · tick 8");
+  fireEvent.click(screen.getByRole("button", { name: "Back up & verify" }));
+  expect((await screen.findByTestId("backup-note")).textContent).toContain(
+    "Backup verified: integrity ok, 1 run(s)",
+  );
+  expect((await screen.findByTestId("backup-list")).textContent).toContain(
+    "verified",
+  );
+});

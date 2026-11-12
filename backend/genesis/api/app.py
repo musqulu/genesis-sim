@@ -26,10 +26,20 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        store = SqliteStore(path.resolve())
-        store.initialize()
-        app.state.runner = SimulationRunner(store, delay_scale=delay_scale)
         app.state.dev_fixtures = tuple(sorted(FIXTURES)) if dev_fixtures else ()
+        app.state.database = path.resolve()
+        app.state.runner = None
+        store = SqliteStore(path.resolve())
+        try:
+            store.initialize()
+            app.state.runner = SimulationRunner(store, delay_scale=delay_scale)
+        except StoreError as exc:
+            # Safe mode (M15): serve a clear technical error instead of failing to start;
+            # nothing is repaired, replaced or rewritten.
+            logging.getLogger("genesis").error("Storage failed verification: %s", exc)
+            app.state.storage_error = str(exc)
+            yield
+            return
         app.state.runner.start_thread()
         try:
             yield

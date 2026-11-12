@@ -803,6 +803,72 @@ export interface PopulationInfo {
   }[];
 }
 
+/** Technical health of the active run and its storage (M15). Never ecological. */
+export interface HealthReport {
+  status: "ok" | "attention";
+  problems: string[];
+  live_tick: number;
+  durable_tick: number | null;
+  running: boolean;
+  last_error: string | null;
+  pending: PendingTick | null;
+  queue: { capacity: number; max_depth_seen: number } | null;
+  provider: Record<string, unknown> | null;
+  disk: {
+    free_bytes: number;
+    total_bytes: number;
+    min_free_bytes: number;
+    ok: boolean;
+    database_bytes: number;
+  };
+  invariants: { ledger_balanced: boolean };
+  metrics: {
+    decisions: number;
+    unparsed: number;
+    latency_ms_median: number | null;
+    provider_failures: number;
+  };
+  technical_log: {
+    at: string;
+    kind: string;
+    subject: string;
+    detail: string;
+  }[];
+}
+
+export interface BackupInfo {
+  name: string;
+  bytes: number;
+  created_at: string | null;
+  verified_ok: boolean | null;
+  runs: number;
+}
+
+export async function requestHealth(): Promise<{
+  status: string;
+  report?: HealthReport;
+  detail?: string;
+}> {
+  return request("/api/health");
+}
+
+export async function requestBackups(): Promise<{ backups: BackupInfo[] }> {
+  return request("/api/backups");
+}
+
+export async function createBackup(): Promise<{
+  ok: boolean;
+  integrity: string;
+  runs: { run_id: string; tick: number; hash_ok: boolean }[];
+  failures: { run_id: string; error: string }[];
+  path: string;
+}> {
+  return request("/api/backups", {
+    method: "POST",
+    signal: AbortSignal.timeout(300000),
+  });
+}
+
 /** A key moment of the run for history navigation (M14). */
 export interface KeyMoment {
   sequence: number;

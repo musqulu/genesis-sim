@@ -30,7 +30,7 @@ from genesis.engine.world import (
     finish_tick,
     prepare_tick,
 )
-from genesis.ops import report
+from genesis.ops import health, report
 from genesis.persistence.sqlite import (
     ControlRecord,
     DecisionAttempt,
@@ -165,6 +165,16 @@ class SimulationRunner:
             self.store.interactions_at_tick(loaded.meta.run_id, loaded.world.tick)
         )
         self._running = False  # A restarted process is always paused; resume is explicit.
+        if loaded.restore is not None:  # a recovery note for the operator (never ecological)
+            r = loaded.restore
+            self.store._technical(
+                loaded.meta.run_id,
+                "loaded",
+                f"tick {loaded.world.tick} at {time.time():.3f}",
+                f"restored from {r.source}"
+                + (f" @ tick {r.snapshot_tick}" if r.snapshot_tick is not None else "")
+                + f" + {r.ticks_replayed} replayed ticks ({r.events_applied} events), verified",
+            )
         self._until: int | None = None
         self._error: str | None = None
         self._generation += 1  # responses for anything earlier are stale from now on
@@ -307,6 +317,13 @@ class SimulationRunner:
             for slot in prepared.slots
         }
         reused = self.store.record_requests(self._meta.run_id, list(requests.values()))
+        if reused:  # recovered after a restart: never ask the model twice
+            self.store._technical(
+                self._meta.run_id,
+                "response_reused",
+                f"tick {prepared.world.tick}",
+                f"{len(reused)} stored response(s) reused: " + ", ".join(sorted(reused)),
+            )
         pending = PendingTick(self._generation, prepared, requests)
         for actor, request in requests.items():
             if request.request_id in reused:  # recovered response: never asked twice
@@ -463,12 +480,42 @@ class SimulationRunner:
         # A technical failure pauses logical time; it never alters or rescues the world.
         if exc is not None:
             log.exception("Tick failed; run paused without changing committed state")
+            kind = (
+                "invariant_failure"
+                if type(exc).__name__ == "InvariantViolation"
+                else "tick_failure"
+            )
+            self.store._technical(
+                self._meta.run_id,
+                kind,
+                f"after tick {self._world.tick} at {time.time():.3f}",
+                message[:500],
+            )
         self._running = False
         self._until = None
         self._step_budget = 0
         self._step_control = None
         self._error = message
         self._cond.notify_all()
+
+    def _disk_ok(self) -> bool:
+        """Disk-space guard: below the minimum, pause before attempting a tick (no
+        ecological time passes). Checked at most every few seconds."""
+        now = time.monotonic()
+        if now < getattr(self, "_disk_checked_until", 0.0):
+            return True
+        free = health.free_bytes(self.store.path)
+        if free >= health.MIN_FREE_BYTES:
+            self._disk_checked_until = now + 5.0
+            return True
+        message = (
+            f"Low disk space: {free // 2**20} MB free, minimum {health.MIN_FREE_BYTES // 2**20} "
+            "MB. Paused before tick "
+            f"{self._world.tick + 1}; no ecological time passed. Free space, then resume."
+        )
+        self.store._technical(self._meta.run_id, "low_disk", f"at {time.time():.3f}", message)
+        self._technical_pause(message)
+        return False
 
     def _retry_failures(self) -> None:
         """An explicit resume/step retries failed requests (same request ids and inputs)."""
@@ -493,6 +540,8 @@ class SimulationRunner:
                         delay = self._next_due - time.monotonic()
                         if self._running and not self._step_budget and delay > 0:
                             self._cond.wait(timeout=delay)
+                            continue
+                        if not self._disk_ok():
                             continue
                         self._begin_tick()
                         continue

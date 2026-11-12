@@ -1679,3 +1679,9 @@ code {
 .moments li.modification span:first-child {
   color: #c9cfdb;
 }
+.health-ok {
+  color: var(--accent);
+}
+.health-attention {
+  color: #ffb4a2;
+}

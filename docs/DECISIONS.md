@@ -1,6 +1,6 @@
 # Decision register
 
-Version: 0.5, 2026-11-11. This file records requirements and proposals. **The user approved implementation and testing of M01–M14, one milestone at a time (see the planning record).** Local MLX-LM and API-support choices remain user-directed; later milestones await approval. The [constitution](../AGENTS.md) remains unchanged. Detailed mechanisms are in [ARCHITECTURE.md](ARCHITECTURE.md), with delivery gates in [ROADMAP.md](ROADMAP.md).
+Version: 0.5, 2026-11-11. This file records requirements and proposals. **The user approved implementation and testing of M01–M15, one milestone at a time (see the planning record).** Local MLX-LM and API-support choices remain user-directed; later milestones await approval. The [constitution](../AGENTS.md) remains unchanged. Detailed mechanisms are in [ARCHITECTURE.md](ARCHITECTURE.md), with delivery gates in [ROADMAP.md](ROADMAP.md).
 
 ## Status definitions
 
@@ -262,4 +262,14 @@ Recorded in [the experiments log](experiments-log.md). No rules changed.
 - **Added** the `lineage` fixture.
 
 No schema change. See [M14 validation](validation/M14.md).
+
+2026-11-12: user asked to push and do M15. Pushed M14. Implemented technical health and safe recovery:
+
+- a health report and panel;
+- recovery, reuse and failure notes;
+- a disk guard (`GENESIS_MIN_FREE_MB`, default 512);
+- **safe mode** instead of a failed start when history fails verification (a behaviour change; the tests were updated);
+- verified backups with restore checks to separate paths.
+
+Failure injection covers crashes inside and after the tick transaction, a pending decision and real `kill -9` crashes. Nothing ecological is ever altered by recovery. See [M15 validation](validation/M15.md).
 

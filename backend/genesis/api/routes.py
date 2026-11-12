@@ -25,6 +25,8 @@ from genesis.domain.config import (
     life_for_run,
 )
 from genesis.engine import actions, memory, messages
+from genesis.ops import health as ops_health
+from genesis.ops import recovery
 from genesis.persistence.replay import HistoryError, HistoryUnavailable
 from genesis.providers import config as api_config
 from genesis.providers import mlx
@@ -39,7 +41,14 @@ MAX_ORGANISMS = 16  # seed population cap (the constitution suggests 8-12; 16 at
 
 
 def runner(request: Request) -> SimulationRunner:
-    return request.app.state.runner
+    sim = getattr(request.app.state, "runner", None)
+    if sim is None:  # safe mode: recorded history failed verification at startup
+        raise HTTPException(
+            status_code=503,
+            detail="Recorded history failed verification at startup; nothing was changed. "
+            f"{request.app.state.storage_error} See /api/health.",
+        )
+    return sim
 
 
 Runner = Annotated[SimulationRunner, Depends(runner)]
@@ -358,6 +367,18 @@ def inspect_organism(
     )
 
 
+@router.get("/backups")
+def list_backups(sim: Runner) -> dict:
+    return {"backups": recovery.list_backups(sim.store)}
+
+
+@router.post("/backups", status_code=201)
+def create_backup(sim: Runner) -> dict:
+    """A consistent copy of the database, verified (integrity + replay of every run's
+    latest tick) before it is reported. Technical only; the live run is not paused."""
+    return recovery.create(sim.store)
+
+
 @router.get("/moments")
 def moments(sim: Runner, limit: Annotated[int, Query(ge=1, le=2000)] = 500) -> dict:
     """Key moments of the active run, oldest first, for history navigation: births of
@@ -527,11 +548,20 @@ def list_requests(sim: Runner) -> dict:
 
 
 @router.get("/health")
-def health(request: Request, sim: Runner) -> dict:
+def health(request: Request) -> dict:
+    sim = getattr(request.app.state, "runner", None)
+    if sim is None:  # safe mode: report what failed; the data is untouched
+        return {
+            "status": "storage_error",
+            "milestone": "M15",
+            "detail": request.app.state.storage_error,
+            "database": str(request.app.state.database),
+        }
     snapshot = sim.snapshot()
     return {
         "status": "ok",
-        "milestone": "M13",
+        "milestone": "M15",
+        "report": ops_health.report(sim),
         "provider": snapshot.provider,
         "pending": snapshot.pending,
         "tick": snapshot.world.tick,
