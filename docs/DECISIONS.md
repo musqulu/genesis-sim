@@ -246,3 +246,11 @@ No world rule changed. See [the benchmark README](../experiments/model_bench/REA
 
 2026-11-12: user asked for a mixed-model test with 15 organisms on a smaller map with enough resources. The seed-population cap was raised from 12 to 16. The constitution suggests 8–12; 15 is the user's explicit choice for this experiment. New runs gained an `inflow_amount` setting (energy per cell per inflow tick, sealed in the manifest; fixtures keep theirs) and a 20 × 20 map option. No rules changed.
 
+2026-11-12: ran the mixed 15-organism test (`6b564fd4`; 8 × 27B, 7 × 4B, 20 × 20, inflow 3×). Extinct at tick 176.
+
+- All 4B organisms starved by tick 41, mostly waiting.
+- 27B organisms lived to ticks 70–176.
+- One birth (no memories passed), and a parent→child message plus an attempted gift.
+
+Recorded in [the experiments log](experiments-log.md). No rules changed.
+
