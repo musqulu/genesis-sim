@@ -46,6 +46,9 @@ class MLXSettings:
     # Reflection replies (M11) cite several record ids; 256 tokens truncated 4 of 17 in the
     # first live run. Runs sealed before this field existed get this default.
     reflection_max_output_tokens: int = 512
+    # Reuse the model state of shared prompt beginnings across requests (inference speed
+    # only; outputs can differ from uncached ones by floating-point rounding).
+    prefix_cache: bool = True
     temperature: float = 0.7
     top_p: float = 0.95
     top_k: int = 20
@@ -337,6 +340,7 @@ class MLXProvider(Provider):
             "messages": messages,
             "max_tokens": self.settings.output_cap(request.purpose),
             "max_context_tokens": self.settings.max_context_tokens,
+            "prefix_cache": self.settings.prefix_cache,
             "temperature": self.settings.temperature,
             "top_p": self.settings.top_p,
             "top_k": self.settings.top_k,
@@ -394,6 +398,10 @@ class MLXProvider(Provider):
                         "limits": {
                             "max_context_tokens": self.settings.max_context_tokens,
                             "max_output_tokens": self.settings.output_cap(request.purpose),
+                        },
+                        "prefix_cache": {
+                            "enabled": self.settings.prefix_cache,
+                            "cached_tokens": message.get("cached_tokens"),
                         },
                         "runtime": self._ready.get("runtime"),
                         "worker_seconds": message.get("seconds"),

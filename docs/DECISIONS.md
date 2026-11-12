@@ -237,3 +237,10 @@ A live trial waits for the user. See [M13 validation](validation/M13.md).
 
 2026-11-12: user asked for another test with no changes. Ran seed 7 (otherwise identical; the same seed would have replayed almost identically) to extinction at tick 182. No births or reproduce attempts. It produced the first two-way message exchange (org-0006 ↔ org-0007, ticks 76–77). Recorded in [M13 validation](validation/M13.md).
 
+2026-11-12: user asked to benchmark a small model and optimise it ("download and run Qwen3.5-4B … optimise … same folder"). Downloaded `mlx-community/Qwen3.5-4B-MLX-4bit` (2.9 GB) into `~/models` and added an offline replay benchmark (`experiments/model_bench/`). Results:
+
+- **4B:** 6–7× faster than the 27B, but 88% parse-valid, 70% engine-accepted, 31% the same action as the 27B, and 35% valid reflections. It is wordy and often passive.
+- **Prefix cache** in the MLX worker (inference only; default on; recorded per decision; can be disabled): −14% (4B) and −18% (27B) latency. Outputs differ from uncached ones only by rounding (27B: 29/30 the same action).
+
+No world rule changed. See [the benchmark README](../experiments/model_bench/README.md).
+
