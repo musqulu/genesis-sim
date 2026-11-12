@@ -233,3 +233,5 @@ Choices:
 
 A live trial waits for the user. See [M13 validation](validation/M13.md).
 
+2026-11-12: live M13 trial (`72e6ce82`, the same configuration as the M12 trial) ran to extinction at tick 136 at the user's request, with **no births or reproduce attempts**. The diverging prompt text gave different sampled trajectories. Live memory inheritance remains unobserved; recorded in [M13 validation](validation/M13.md). No rules changed.
+
