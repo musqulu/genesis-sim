@@ -235,3 +235,5 @@ A live trial waits for the user. See [M13 validation](validation/M13.md).
 
 2026-11-12: live M13 trial (`72e6ce82`, the same configuration as the M12 trial) ran to extinction at tick 136 at the user's request, with **no births or reproduce attempts**. The diverging prompt text gave different sampled trajectories. Live memory inheritance remains unobserved; recorded in [M13 validation](validation/M13.md). No rules changed.
 
+2026-11-12: user asked for another test with no changes. Ran seed 7 (otherwise identical; the same seed would have replayed almost identically) to extinction at tick 182. No births or reproduce attempts. It produced the first two-way message exchange (org-0006 ↔ org-0007, ticks 76–77). Recorded in [M13 validation](validation/M13.md).
+
