@@ -204,6 +204,7 @@ def test_fixtures_exist_only_in_dev_mode_and_are_labeled(database):
             "birth_pair",
             "corner_perception",
             "exchange_pair",
+            "lineage",
             "material_workshop",
             "memory_budget",
             "memory_return",

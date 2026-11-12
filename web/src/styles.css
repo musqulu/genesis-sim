@@ -1648,3 +1648,34 @@ code {
   border-color: #ffd166;
   color: #ffe2a0;
 }
+
+.genealogy-tree,
+.genealogy-tree ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 14px;
+  font: 12px var(--mono);
+  line-height: 1.8;
+}
+.genealogy-tree {
+  padding-left: 0;
+}
+.genealogy-tree ul {
+  border-left: 1px dotted #ff8fd1;
+}
+.selected-node {
+  color: #ff8fd1;
+  font-weight: 600;
+}
+.change-table tr.highlight-row td {
+  background: #3a2f12;
+}
+.moments li.birth span:first-child {
+  color: #ff8fd1;
+}
+.moments li.death span:first-child {
+  color: var(--muted);
+}
+.moments li.modification span:first-child {
+  color: #c9cfdb;
+}

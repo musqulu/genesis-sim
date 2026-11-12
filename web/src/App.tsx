@@ -9,6 +9,7 @@ import {
   requestEvent,
   requestEvents,
   requestHistory,
+  requestMoments,
   requestModels,
   requestSnapshots,
   requestWorld,
@@ -25,6 +26,7 @@ import type {
   GridFrame,
   HistoryFrame,
   Interaction,
+  KeyMoment,
   ModelsInfo,
   OrganismDetail,
   RunSummary,
@@ -34,6 +36,7 @@ import type {
 import CanvasGrid, { EXCHANGE_FADE } from "./renderers/CanvasGrid";
 import ExchangeFeed from "./components/ExchangeFeed";
 import PopulationPanel from "./components/PopulationPanel";
+import GenealogyPanel from "./components/GenealogyPanel";
 import CellInspector from "./components/CellInspector";
 import DecisionInspector from "./components/DecisionInspector";
 import EventList from "./components/EventList";
@@ -116,6 +119,10 @@ export default function App() {
   const [recent, setRecent] = useState<CellRecentChange[]>([]);
   const [entryCost, setEntryCost] = useState<number | null>(null);
   const [organismId, setOrganismId] = useState<string | null>(null);
+  // M14 cross-links: a decision to open, a memory record to highlight, key moments.
+  const [focusRequest, setFocusRequest] = useState<string | null>(null);
+  const [highlightMemory, setHighlightMemory] = useState<string | null>(null);
+  const [moments, setMoments] = useState<KeyMoment[]>([]);
   const [organismDetail, setOrganismDetail] = useState<OrganismDetail | null>(
     null,
   );
@@ -466,6 +473,32 @@ export default function App() {
 
   // The displayed world: an immutable historical reconstruction, or the live frame.
   const view: WorldView | null = history ?? frame;
+
+  const momentsKey = frame
+    ? `${frame.run_id}:${Math.floor(frame.tick / 5)}`
+    : "";
+  useEffect(() => {
+    if (!dashboardOpen || !momentsKey) return;
+    let cancelled = false;
+    requestMoments()
+      .then((next) => {
+        if (!cancelled) setMoments(next.moments);
+      })
+      .catch(() => undefined); // an older backend has no key moments
+    return () => {
+      cancelled = true;
+    };
+  }, [dashboardOpen, momentsKey]);
+
+  const openDecision = (actorId: string, requestId: string) => {
+    setOrganismId(actorId);
+    setFocusRequest(requestId);
+  };
+  const openSource = (parentId: string, sourceId: string, tick: number) => {
+    void seek(tick, "snapshot");
+    setOrganismId(parentId);
+    setHighlightMemory(sourceId);
+  };
 
   // Recent transfers/messages of the live run (display only): kept for a few ticks so a
   // one-tick exchange stays visible while quiet ticks pass quickly.
@@ -836,6 +869,8 @@ export default function App() {
                 onSelect={setOrganismId}
                 onToggleLocalView={setShowLocalView}
                 onSelectEvent={setSelectedEvent}
+                onOpenSource={openSource}
+                highlightMemory={highlightMemory}
               />
               <TickPicker
                 liveTick={frame.tick}
@@ -846,6 +881,13 @@ export default function App() {
                 disabled={connection !== "connected"}
                 onSeek={(tick, source) => void seek(tick, source)}
                 onReturnLive={() => setHistory(null)}
+                moments={moments}
+              />
+              <GenealogyPanel
+                organisms={view.organisms}
+                tick={view.tick}
+                selected={organismId}
+                onSelect={setOrganismId}
               />
               <CellInspector
                 frame={view}
@@ -854,6 +896,7 @@ export default function App() {
                 entryCost={entryCost}
                 onSelect={setSelected}
                 onSelectEvent={setSelectedEvent}
+                live={history ? frame : null}
               />
               <section className="run-panel panel" aria-labelledby="run-title">
                 <div className="panel-heading">
@@ -998,6 +1041,7 @@ export default function App() {
                   refreshKey={frame.last_event_sequence}
                   maxTick={history?.tick}
                   onSelectEvent={setSelectedEvent}
+                  focusRequest={focusRequest}
                 />
               )}
               <EventList
@@ -1009,6 +1053,7 @@ export default function App() {
                 onSelect={setSelectedEvent}
                 onLoadOlder={() => void loadOlder()}
                 onSelectCell={selectCellFromEvent}
+                onOpenDecision={openDecision}
               />
             </Dashboard>
             {summary && (

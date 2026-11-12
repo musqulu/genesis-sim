@@ -3,6 +3,9 @@ import type { MemoryDetail, MemoryRecordView } from "../api";
 interface Props {
   memory: MemoryDetail;
   onSelectEvent: (sequence: number) => void;
+  // M14: open an inherited record's source in its parent's memory at the birth tick.
+  onOpenSource?: (parentId: string, sourceId: string, tick: number) => void;
+  highlight?: string | null;
 }
 
 const shortId = (id: string) => id.slice(id.lastIndexOf("-") + 1);
@@ -36,10 +39,14 @@ function RecordRows({
   records,
   forgotten,
   onSelectEvent,
+  onOpenSource,
+  highlight,
 }: {
   records: MemoryRecordView[];
   forgotten: boolean;
   onSelectEvent: (sequence: number) => void;
+  onOpenSource?: Props["onOpenSource"];
+  highlight?: string | null;
 }) {
   return (
     <table>
@@ -56,7 +63,11 @@ function RecordRows({
       </thead>
       <tbody>
         {records.map((m) => (
-          <tr key={m.id}>
+          <tr
+            key={m.id}
+            className={m.id === highlight ? "highlight-row" : ""}
+            data-testid={m.id === highlight ? "highlighted-memory" : undefined}
+          >
             <td title={m.id}>{shortId(m.id)}</td>
             <td>
               <span className={`memory-kind ${m.kind}`}>{m.kind}</span>
@@ -75,6 +86,23 @@ function RecordRows({
                   {m.origin.ancestor_id !== m.origin.from
                     ? ` · first recorded by ${m.origin.ancestor_id}`
                     : ""}
+                  {onOpenSource && (
+                    <>
+                      {" "}
+                      <button
+                        className="link-button"
+                        onClick={() =>
+                          onOpenSource(
+                            m.origin!.from,
+                            m.origin!.source_id,
+                            m.tick,
+                          )
+                        }
+                      >
+                        open source
+                      </button>
+                    </>
+                  )}
                 </span>
               )}
               {m.evidence && m.evidence.length > 0 && (
@@ -107,7 +135,12 @@ function RecordRows({
   );
 }
 
-export default function MemoryInspector({ memory, onSelectEvent }: Props) {
+export default function MemoryInspector({
+  memory,
+  onSelectEvent,
+  onOpenSource,
+  highlight = null,
+}: Props) {
   const { limits } = memory;
   const recall = memory.last_recall;
   const scores = recall?.recall?.scores ?? [];
@@ -193,6 +226,8 @@ export default function MemoryInspector({ memory, onSelectEvent }: Props) {
             records={memory.active}
             forgotten={false}
             onSelectEvent={onSelectEvent}
+            onOpenSource={onOpenSource}
+            highlight={highlight}
           />
         </div>
       )}

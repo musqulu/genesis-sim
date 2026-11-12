@@ -551,6 +551,24 @@ FIXTURES: dict[str, Fixture] = {
         "cooldown, a too-small endowment, an occupied cell and too little energy; the child "
         "runs the same script and is too poor to reproduce. No energy inflow",
     ),
+    # M14: two generations with a lasting cell change, for history and genealogy checks.
+    "lineage": Fixture(
+        {},
+        LifeConfig(
+            **_EVERY_TICK,
+            exchange_enabled=False,
+            reflection_enabled=False,
+            start_energy=100,
+            lifespan_min=18,
+            lifespan_max=22,
+            inherit_memory_retention_percent=100,
+            seeds=(SeedOrganism(12, 12, "lineage_parent", (60, 40, 50, 70, 50, 80)),),
+        ),
+        "A scripted parent gathers material, packs 4 units into its cell (a lasting change), "
+        "gives birth east at tick 7 passing two memories (labeled 100% retention), and dies "
+        "of age by tick 22; its child lives on and later dies too",
+        stockpiles=((12, 12, 20),),
+    ),
     # M13: a scripted parent passes copies of selected memories to its child.
     "birth_memory": Fixture(
         {},

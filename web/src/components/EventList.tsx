@@ -9,6 +9,7 @@ interface Props {
   onSelect: (sequence: number | null) => void;
   onLoadOlder: () => void;
   onSelectCell: (cell: Cell) => void;
+  onOpenDecision?: (actorId: string, requestId: string) => void; // M14
 }
 
 export function describeEvent(event: EventSummary): string {
@@ -51,6 +52,7 @@ export default function EventList({
   hasMore,
   selectedSequence,
   detail,
+  onOpenDecision,
   detailError,
   onSelect,
   onLoadOlder,
@@ -100,6 +102,25 @@ export default function EventList({
             <>
               <h3>
                 Event {detail.sequence} · tick {detail.tick}
+                {onOpenDecision &&
+                  detail.actor_id &&
+                  typeof detail.payload?.request_id === "string" && (
+                    <>
+                      {" "}
+                      ·{" "}
+                      <button
+                        className="link-button"
+                        onClick={() =>
+                          onOpenDecision(
+                            detail.actor_id!,
+                            detail.payload!.request_id as string,
+                          )
+                        }
+                      >
+                        open decision
+                      </button>
+                    </>
+                  )}
               </h3>
               <dl className="properties">
                 <div>

@@ -8,6 +8,7 @@ interface Props {
   refreshKey: number;
   maxTick?: number;
   onSelectEvent: (sequence: number) => void;
+  focusRequest?: string | null; // M14: open this attempt (from an event)
 }
 
 function outcomeLabel(d: DecisionRecord): string {
@@ -25,6 +26,7 @@ export default function DecisionInspector({
   refreshKey,
   maxTick,
   onSelectEvent,
+  focusRequest = null,
 }: Props) {
   const [decisions, setDecisions] = useState<DecisionRecord[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -32,9 +34,9 @@ export default function DecisionInspector({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setSelected(null);
+    setSelected(focusRequest);
     setDetail(null);
-  }, [runId, organismId]);
+  }, [runId, organismId, focusRequest]);
 
   useEffect(() => {
     if (!organismId) return setDecisions([]);

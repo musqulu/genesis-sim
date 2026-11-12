@@ -1948,3 +1948,144 @@ it("shows a child's inheritance: tendency draws and kept or dropped memories", a
     "from org-0001 · was outcome m00014 at t7",
   );
 });
+
+it("shows a genealogy tree, key moments to seek before or after, and a cell compared with now", async () => {
+  const parent = makeOrganism({
+    alive: false,
+    death_tick: 19,
+    death_cause: "age",
+    energy: 0,
+  });
+  const child = makeOrganism({
+    id: "org-0002",
+    generation: 1,
+    birth_tick: 7,
+    parent_ids: ["org-0001"],
+    x: 2,
+    y: 0,
+  });
+  const seeks: number[] = [];
+  const state = backend({
+    frame: makeFrame({ tick: 24, organisms: [parent, child] }),
+    moments: [
+      {
+        sequence: 30,
+        tick: 5,
+        kind: "modification",
+        actor_id: "org-0001",
+        text: "org-0001 packed 2 at (0, 0)",
+      },
+      {
+        sequence: 40,
+        tick: 7,
+        kind: "birth",
+        actor_id: "org-0002",
+        text: "org-0002 born to org-0001",
+      },
+      {
+        sequence: 90,
+        tick: 19,
+        kind: "death",
+        actor_id: "org-0001",
+        text: "org-0001 died (age)",
+      },
+    ],
+    history: (tick) => {
+      seeks.push(tick);
+      return makeHistory(tick, {
+        organisms: tick >= 7 ? [parent, child] : [parent],
+      });
+    },
+  });
+  vi.stubGlobal("fetch", stubBackend(state));
+  render(<App />);
+  openDashboard();
+  const tree = await screen.findByRole("list", { name: "Genealogy tree" });
+  const parentItem = within(tree)
+    .getByRole("button", { name: "org-0001" })
+    .closest("li")!;
+  expect(
+    within(parentItem).getByRole("button", { name: "org-0002" }),
+  ).toBeTruthy();
+  expect(tree.textContent).toContain("gen 1 · t7–");
+  const moments = await screen.findByRole("list", { name: "Key moments" });
+  expect(moments.textContent).toContain("t7 · org-0002 born to org-0001");
+  const birth = within(moments)
+    .getByText(/born to/)
+    .closest("li")!;
+  fireEvent.click(within(birth).getByRole("button", { name: "before" }));
+  await waitFor(() => expect(seeks).toContain(6));
+  await waitFor(() =>
+    expect(screen.getByTestId("history-banner")).toBeTruthy(),
+  );
+  const historicTree = screen.getByRole("list", { name: "Genealogy tree" });
+  expect(
+    within(historicTree).queryByRole("button", { name: "org-0002" }),
+  ).toBeNull();
+  expect((await screen.findByTestId("cell-compare")).textContent).toContain(
+    "Now (tick 24)",
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Next tick" }));
+  await waitFor(() => expect(seeks).toContain(7));
+});
+
+it("opens the decision behind an event from the event list", async () => {
+  const organism = makeOrganism();
+  const first = makeDecision({
+    request_id: "t00000005-org-0001",
+    tick: 5,
+    raw_output: '{"action":"wait"}',
+  });
+  const older = makeDecision({
+    request_id: "t00000001-org-0001",
+    tick: 1,
+    raw_output: '{"action":"move","direction":"east"}',
+  });
+  const event = {
+    ...makeOrganismDetail(organism).latest_decision!,
+    sequence: 12,
+    tick: 1,
+    payload: {
+      ...makeOrganismDetail(organism).latest_decision!.payload,
+      request_id: "t00000001-org-0001",
+    },
+  };
+  const state = backend({
+    frame: makeFrame({
+      tick: 5,
+      organisms: [organism],
+      provider: recordedProvider,
+    }),
+    decisions: [first, older],
+    events: [
+      {
+        ...event,
+        organism_changes: undefined,
+        changes: undefined,
+        ledger: undefined,
+      } as never,
+    ],
+    detail: event,
+  });
+  state.organism = () => makeOrganismDetail(organism);
+  vi.stubGlobal("fetch", stubBackend(state));
+  render(<App />);
+  openDashboard();
+  const list = await screen.findByRole("list", { name: "Decision attempts" });
+  await waitFor(() =>
+    expect(screen.getByTestId("raw-output").textContent).toBe(
+      '{"action":"wait"}',
+    ),
+  );
+  const events = await screen.findByRole("list", { name: "Events" });
+  fireEvent.click(within(events).getAllByRole("button")[0]);
+  fireEvent.click(await screen.findByRole("button", { name: "open decision" }));
+  await waitFor(() =>
+    expect(screen.getByTestId("raw-output").textContent).toBe(
+      '{"action":"move","direction":"east"}',
+    ),
+  );
+  expect(
+    within(list).getAllByRole("button")[1].getAttribute("aria-pressed"),
+  ).toBe("true");
+});

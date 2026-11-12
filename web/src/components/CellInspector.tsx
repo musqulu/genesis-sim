@@ -8,6 +8,7 @@ interface Props {
   entryCost: number | null;
   onSelect: (cell: Cell) => void;
   onSelectEvent: (sequence: number) => void;
+  live?: WorldView | null; // M14: in history mode, the live frame to compare against
 }
 
 export default function CellInspector({
@@ -17,6 +18,7 @@ export default function CellInspector({
   entryCost,
   onSelect,
   onSelectEvent,
+  live = null,
 }: Props) {
   const [x, setX] = useState(String(selected.x));
   const [y, setY] = useState(String(selected.y));
@@ -72,6 +74,16 @@ export default function CellInspector({
           <dd>{frame.tick}</dd>
         </div>
       </dl>
+      {live && live.tick !== frame.tick && (
+        <p className="small-copy" data-testid="cell-compare">
+          {(() => {
+            const now = live.cells[selected.y * live.config.width + selected.x];
+            const d = (a: number, b: number) =>
+              b === a ? "=" : b > a ? `+${b - a}` : `${b - a}`;
+            return `Now (tick ${live.tick}): energy ${now.energy} (${d(cell.energy, now.energy)}), loose ${now.loose_material} (${d(cell.loose_material, now.loose_material)}), packed ${now.packed_material} (${d(cell.packed_material, now.packed_material)})`;
+          })()}
+        </p>
+      )}
       <h3 className="subheading">Recent changes</h3>
       {recent.length === 0 ? (
         <p className="muted small-copy">

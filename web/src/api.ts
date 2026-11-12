@@ -362,6 +362,7 @@ export interface Observation {
 }
 
 export interface DecisionPayload {
+  request_id?: string; // M06+: the decision request this outcome consumed
   observation: Observation;
   observation_sha256: string;
   origin: { x: number; y: number };
@@ -800,6 +801,22 @@ export interface PopulationInfo {
     tendencies: Record<string, number> | null;
     stats: BehaviourStats | null;
   }[];
+}
+
+/** A key moment of the run for history navigation (M14). */
+export interface KeyMoment {
+  sequence: number;
+  tick: number;
+  kind: "birth" | "death" | "modification" | "extinction";
+  actor_id: string | null;
+  text: string;
+}
+
+export async function requestMoments(): Promise<{
+  run_id: string;
+  moments: KeyMoment[];
+}> {
+  return request("/api/moments");
 }
 
 export async function requestPopulation(

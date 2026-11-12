@@ -323,7 +323,8 @@ def inspect_organism(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except HistoryError as exc:
             raise HTTPException(409, f"Historical data unavailable: {exc}") from exc
-    views = {v.id: v for v in organism_views(world, dead_ids(snapshot.world))}
+    # History shows only what was true at that tick: a lifespan is revealed once dead then.
+    views = {v.id: v for v in organism_views(world, dead_ids(world))}
     if organism_id not in views:
         raise HTTPException(status_code=404, detail="No such organism at this tick")
     events, _ = sim.store.list_events(run_id, 20, None, at_tick, organism_id)
@@ -355,6 +356,14 @@ def inspect_organism(
             "stats": sim.store.behaviour_stats(run_id, at_tick).get(organism_id),
         },
     )
+
+
+@router.get("/moments")
+def moments(sim: Runner, limit: Annotated[int, Query(ge=1, le=2000)] = 500) -> dict:
+    """Key moments of the active run, oldest first, for history navigation: births of
+    run-born organisms, deaths, accepted cell modifications and extinction."""
+    run_id = sim.snapshot().meta.run_id
+    return {"run_id": run_id, "moments": sim.store.key_moments(run_id, limit)}
 
 
 @router.get("/population")

@@ -1,6 +1,6 @@
 # Decision register
 
-Version: 0.5, 2026-11-11. This file records requirements and proposals. **The user approved implementation and testing of M01–M13, one milestone at a time (see the planning record).** Local MLX-LM and API-support choices remain user-directed; later milestones await approval. The [constitution](../AGENTS.md) remains unchanged. Detailed mechanisms are in [ARCHITECTURE.md](ARCHITECTURE.md), with delivery gates in [ROADMAP.md](ROADMAP.md).
+Version: 0.5, 2026-11-11. This file records requirements and proposals. **The user approved implementation and testing of M01–M14, one milestone at a time (see the planning record).** Local MLX-LM and API-support choices remain user-directed; later milestones await approval. The [constitution](../AGENTS.md) remains unchanged. Detailed mechanisms are in [ARCHITECTURE.md](ARCHITECTURE.md), with delivery gates in [ROADMAP.md](ROADMAP.md).
 
 ## Status definitions
 
@@ -253,4 +253,13 @@ No world rule changed. See [the benchmark README](../experiments/model_bench/REA
 - One birth (no memories passed), and a parent→child message plus an attempted gift.
 
 Recorded in [the experiments log](experiments-log.md). No rules changed.
+
+2026-11-12: user asked to push and move to M14. Pushed. Implemented historical inspection and genealogy:
+
+- **Fixed** history views that revealed lifespans of organisms dying later than the viewed tick.
+- **Added** `/api/moments` (births, deaths, modifications, extinction) with before/after seeking and tick stepping.
+- **Added** a genealogy tree, event → decision and inherited-memory → source navigation, and a cell comparison with the live values.
+- **Added** the `lineage` fixture.
+
+No schema change. See [M14 validation](validation/M14.md).
 

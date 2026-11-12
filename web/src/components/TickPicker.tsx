@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { HistoryFrame, SnapshotInfo } from "../api";
+import type { HistoryFrame, KeyMoment, SnapshotInfo } from "../api";
 
 type Source = "snapshot" | "initial";
 
@@ -12,6 +12,7 @@ interface Props {
   disabled: boolean;
   onSeek: (tick: number, source: Source) => void;
   onReturnLive: () => void;
+  moments?: KeyMoment[]; // M14: births, deaths, modifications, extinction
 }
 
 export default function TickPicker({
@@ -23,6 +24,7 @@ export default function TickPicker({
   disabled,
   onSeek,
   onReturnLive,
+  moments = [],
 }: Props) {
   const [tick, setTick] = useState(String(history?.tick ?? 0));
   const [source, setSource] = useState<Source>("snapshot");
@@ -93,11 +95,67 @@ export default function TickPicker({
           {busy ? "Rebuilding…" : "View tick"}
         </button>
         {history && (
-          <button type="button" className="button" onClick={onReturnLive}>
-            Return to live
-          </button>
+          <>
+            <button
+              type="button"
+              className="button"
+              aria-label="Previous tick"
+              disabled={disabled || busy || history.tick <= 0}
+              onClick={() => onSeek(history.tick - 1, source)}
+            >
+              ◀ tick
+            </button>
+            <button
+              type="button"
+              className="button"
+              aria-label="Next tick"
+              disabled={disabled || busy || history.tick >= liveTick}
+              onClick={() => onSeek(history.tick + 1, source)}
+            >
+              tick ▶
+            </button>
+            <button type="button" className="button" onClick={onReturnLive}>
+              Return to live
+            </button>
+          </>
         )}
       </form>
+      {moments.length > 0 && (
+        <div className="moments" data-testid="key-moments">
+          <h3 className="subheading">Key moments</h3>
+          <ul className="cell-history" aria-label="Key moments">
+            {moments
+              .slice()
+              .reverse()
+              .slice(0, 40)
+              .map((m) => (
+                <li key={m.sequence} className={`moment ${m.kind}`}>
+                  <span>
+                    t{m.tick} · {m.text}
+                  </span>
+                  <span>
+                    <button
+                      type="button"
+                      className="link-button"
+                      disabled={disabled || busy || m.tick < 1}
+                      onClick={() => onSeek(m.tick - 1, source)}
+                    >
+                      before
+                    </button>{" "}
+                    <button
+                      type="button"
+                      className="link-button"
+                      disabled={disabled || busy}
+                      onClick={() => onSeek(m.tick, source)}
+                    >
+                      after
+                    </button>
+                  </span>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
       {!valid && tick !== "" && (
         <p className="error-text small-copy">
           Choose a committed tick between 0 and {liveTick}.

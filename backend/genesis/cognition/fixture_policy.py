@@ -217,6 +217,21 @@ def memory_parent(context: dict) -> Proposal:
     return Proposal("wait")
 
 
+def lineage_parent(context: dict) -> Proposal:
+    """lineage fixture (M14). Ages 1-4: extract 5 material; 5-6: pack 2 into its cell;
+    7: give birth east (endowment 30) passing its two newest recalled outcome records; then
+    wait. Its child runs the same script on its own cell (mostly rejected). Scripted."""
+    age = context["observation"]["age"]
+    if age <= 4:
+        return Proposal("extract", resource="material", amount=5)
+    if age <= 6:
+        return Proposal("modify", mode="pack", amount=2)
+    if age == 7:
+        recalled = [m["id"] for m in context.get("recalled") or [] if m["kind"] == "outcome"]
+        return Proposal("reproduce", direction="east", endowment=30, memory_ids=recalled[:2])
+    return Proposal("wait")
+
+
 def reproducer(context: dict) -> Proposal:
     """birth_pair fixture: a fixed script by age; its child runs the same script and is
     too poor to reproduce (40 energy < fee 10 + 40 + keep 10). Scripted, not adaptive."""
@@ -230,6 +245,7 @@ REFLECT_POLICIES: dict[str, Callable[[dict], dict]] = {
 }
 
 CONTEXT_POLICIES: dict[str, Callable[[dict], Proposal]] = {
+    "lineage_parent": lineage_parent,
     "memory_parent": memory_parent,
     "reproducer": reproducer,
     "walk_reflect": walk_square,

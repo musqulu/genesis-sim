@@ -19,6 +19,8 @@ interface Props {
   onSelect: (id: string) => void;
   onToggleLocalView: (show: boolean) => void;
   onSelectEvent: (sequence: number) => void;
+  onOpenSource?: (parentId: string, sourceId: string, tick: number) => void;
+  highlightMemory?: string | null;
 }
 
 function describeOutcome(detail: OrganismDetail): string {
@@ -63,6 +65,8 @@ export default function OrganismPanel({
   onSelect,
   onToggleLocalView,
   onSelectEvent,
+  onOpenSource,
+  highlightMemory = null,
 }: Props) {
   if (organisms.length === 0)
     return (
@@ -313,6 +317,8 @@ export default function OrganismPanel({
             <MemoryInspector
               memory={detail.memory}
               onSelectEvent={onSelectEvent}
+              onOpenSource={onOpenSource}
+              highlight={highlightMemory}
             />
           )}
           {detail.events.length > 0 && (

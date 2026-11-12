@@ -312,7 +312,8 @@ def to_history(
         changed_cells=tuple(changed),
         changed_organisms=tuple(changed_organisms),
         interactions=tuple(Interaction(**i) for i in interactions),
-        organisms=organism_views(world, dead_ids(live_world)),
+        # Only deaths that had happened by this tick reveal a lifespan (no future data).
+        organisms=organism_views(world, dead_ids(world)),
         extinct=world.extinct,
         cells=tuple(CellView(**asdict(cell)) for cell in world.cells),
         ledger=ledger_view(world),

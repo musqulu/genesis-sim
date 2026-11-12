@@ -8,6 +8,7 @@ import type {
   HistoryFrame,
   OrganismDetail,
   PopulationInfo,
+  KeyMoment,
   OrganismView,
   SnapshotInfo,
 } from "./api";
@@ -305,6 +306,7 @@ export interface Backend {
   organism?: (id: string) => OrganismDetail | null;
   decisions?: DecisionRecord[];
   population?: PopulationInfo;
+  moments?: KeyMoment[];
   models?: ModelsInfo;
   summary?: string;
   frame: GridFrame;
@@ -324,6 +326,11 @@ export function stubBackend(backend: Backend) {
       json: async () => body,
     });
     if (url === "/api/world") return reply(backend.frame);
+    if (url === "/api/moments")
+      return reply({
+        run_id: backend.frame.run_id,
+        moments: backend.moments ?? [],
+      });
     if (url.startsWith("/api/population"))
       return backend.population
         ? reply(backend.population)

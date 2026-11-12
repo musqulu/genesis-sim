@@ -1181,6 +1181,35 @@ class SqliteStore:
             a["cells_visited"] = len(a.pop("cells"))
         return stats
 
+    def key_moments(self, run_id: str, limit: int = 500) -> list[dict]:
+        """Births (not seed births), deaths, accepted modifications and extinction."""
+        with closing(self._connect()) as db:
+            rows = db.execute(
+                "SELECT sequence, tick, type, rule_id, actor_id, summary_json FROM events "
+                "WHERE run_id = ? AND (rule_id = 'life.birth.v1' OR type IN "
+                "('organism_died', 'extinction') OR rule_id = 'action.modify.v1') "
+                "AND type != 'action_rejected' ORDER BY sequence LIMIT ?",
+                (run_id, limit),
+            ).fetchall()
+        out = []
+        for sequence, tick, type_, rule, actor, summary_json in rows:
+            s = json.loads(summary_json)
+            if rule == "life.birth.v1":
+                kind, text = "birth", f"{actor} born to {s.get('parent_id')}"
+            elif type_ == "organism_died":
+                kind, text = "death", f"{actor} died ({s.get('cause')})"
+            elif type_ == "extinction":
+                kind, text = "extinction", "extinction"
+            else:
+                kind = "modification"
+                text = (
+                    f"{actor} {s.get('mode')}ed {s.get('amount')} at ({s.get('x')}, {s.get('y')})"
+                )
+            out.append(
+                {"sequence": sequence, "tick": tick, "kind": kind, "actor_id": actor, "text": text}
+            )
+        return out
+
     def birth_record(self, run_id: str, organism_id: str) -> dict | None:
         """How a run-born organism came to be (M12/M13): parent, tick and the logged
         inheritance of tendencies and memories. None for seed organisms."""
