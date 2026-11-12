@@ -65,8 +65,9 @@ class Ledger:
 
 
 DEATH_CAUSES = ("age", "starvation", "exhaustion")
-# "message": read from the inbox (M09); "reflection": the organism's own interpretation (M11)
-MEMORY_KINDS = ("observation", "outcome", "message", "reflection")
+# "message": read from the inbox (M09); "reflection": the organism's own interpretation (M11);
+# "inherited": a copy of a parent's record received at birth (M13)
+MEMORY_KINDS = ("observation", "outcome", "message", "reflection", "inherited")
 MESSAGE_KINDS = ("message", "transfer")  # words, or a receipt for a transfer
 MESSAGE_STATES = ("pending", "delivered")
 
@@ -136,6 +137,9 @@ class MemoryRecord:
     # Reflections only: ids of the owner's records cited as support (M11). The links stay
     # in history even if the cited records are later forgotten.
     evidence: tuple[str, ...] = ()
+    # Inherited records only (M13): where the copy came from. Keys: from (parent id),
+    # source_id, source_kind, source_tick, ancestor_id (who first recorded it).
+    origin: dict | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.id, str) or not self.id.startswith(f"{self.owner_id}-m"):
@@ -156,6 +160,8 @@ class MemoryRecord:
             raise ValueError("evidence must cite the owner's own records")
         if (self.kind == "reflection") != bool(self.evidence):
             raise ValueError("a reflection, and only a reflection, cites evidence")
+        if (self.kind == "inherited") != (self.origin is not None):
+            raise ValueError("an inherited record, and only one, carries its origin")
 
     @property
     def size(self) -> int:
@@ -169,6 +175,8 @@ class MemoryRecord:
             data["evidence"] = list(self.evidence)
         else:
             del data["evidence"]
+        if self.origin is None:
+            del data["origin"]
         return data
 
     @classmethod
@@ -320,9 +328,10 @@ class World:
     # 8: M09 (+ exchange rules and every pending or unread inbox item);
     # 9: M10 (+ tendency mode and each organism's starting tendencies);
     # 10: M11 (+ reflection rules, last reflection tick, reflection records);
-    # 11: M12 (+ reproduction rules and each organism's last birth tick).
+    # 11: M12 (+ reproduction rules and each organism's last birth tick);
+    # 12: M13 (+ memory inheritance rules and inherited records).
     # Each schema hashes exactly the fields it defines, so older runs keep their hashes.
-    schema: int = 11
+    schema: int = 12
     life: LifeConfig | None = None
     organisms: tuple[Organism, ...] = ()
     memories: tuple[MemoryRecord, ...] = ()  # active records only, ordered by id
@@ -351,6 +360,8 @@ class World:
             raise ValueError("memory requires state schema 7")
         if self.schema < 8 and (self.messages or any(o.messages_sent for o in self.organisms)):
             raise ValueError("messages require state schema 8")
+        if self.schema < 12 and any(m.kind == "inherited" for m in self.memories):
+            raise ValueError("inherited memory requires state schema 12")
         if self.schema < 11 and any(o.last_reproduced_tick is not None for o in self.organisms):
             raise ValueError("reproduction requires state schema 11")
         if self.schema < 10 and (

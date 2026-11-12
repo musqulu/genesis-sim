@@ -14,6 +14,7 @@ const NATURE: Record<string, string> = {
   outcome: "fact",
   message: "claim",
   reflection: "interpretation",
+  inherited: "inherited claim",
 };
 
 function EventLink({
@@ -67,6 +68,15 @@ function RecordRows({
             </td>
             <td className="memory-text">
               {m.text}
+              {m.origin && (
+                <span className="memory-cites">
+                  from {m.origin.from} · was {m.origin.source_kind}{" "}
+                  {shortId(m.origin.source_id)} at t{m.origin.source_tick}
+                  {m.origin.ancestor_id !== m.origin.from
+                    ? ` · first recorded by ${m.origin.ancestor_id}`
+                    : ""}
+                </span>
+              )}
               {m.evidence && m.evidence.length > 0 && (
                 <span className="memory-cites">
                   cites {m.evidence.map(shortId).join(", ")}

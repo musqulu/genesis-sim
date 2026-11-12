@@ -1857,3 +1857,94 @@ it("shows a birth on the stage and the child's parent and generation", async () 
     ),
   );
 });
+
+it("shows a child's inheritance: tendency draws and kept or dropped memories", async () => {
+  const child = makeOrganism({
+    id: "org-0002",
+    generation: 1,
+    parent_ids: ["org-0001"],
+  });
+  const detail = {
+    ...makeOrganismDetail(child),
+    inheritance: {
+      event_sequence: 77,
+      tick: 11,
+      parent_id: "org-0001",
+      generation: 1,
+      inheritance: {
+        mask: [true, false, true, true, false, true],
+        parent: [50, 50, 50, 50, 50, 50],
+        child: [48, 12, 54, 58, 73, 58],
+        memories: {
+          selected: ["org-0001-m00014", "org-0001-m00012"],
+          retained: ["org-0001-m00014"],
+          dropped: ["org-0001-m00012"],
+          copies: ["org-0002-m00001"],
+        },
+      },
+    },
+    memory: {
+      limits: {
+        max_records: 64,
+        max_bytes: 16384,
+        record_max_bytes: 256,
+        write_fee_per_kib: 1,
+        upkeep_per_kib: 1,
+        upkeep_interval: 10,
+        recall_max: 8,
+        recall_max_bytes: 2048,
+      },
+      active_records: 1,
+      active_bytes: 60,
+      written_total: 1,
+      active: [
+        {
+          id: "org-0002-m00001",
+          owner_id: "org-0002",
+          kind: "inherited",
+          tick: 11,
+          age: 0,
+          x: 12,
+          y: 12,
+          text: "[from org-0001] extracted 2 energy from this cell; fee 1 energy",
+          keywords: ["energy", "inherited"],
+          salience: 2,
+          bytes: 60,
+          added_sequence: 76,
+          origin: {
+            from: "org-0001",
+            source_id: "org-0001-m00014",
+            source_kind: "outcome",
+            source_tick: 7,
+            ancestor_id: "org-0001",
+          },
+        },
+      ],
+      forgotten: [],
+      last_recall: null,
+    },
+  };
+  const state = backend({ frame: makeFrame({ tick: 12, organisms: [child] }) });
+  state.organism = () => detail;
+  vi.stubGlobal("fetch", stubBackend(state));
+  render(<App />);
+  openDashboard();
+  const panel = await screen.findByTestId("inheritance-panel");
+  expect(panel.textContent).toContain(
+    "Born at tick 11 to org-0001 (generation 1)",
+  );
+  const table = within(panel).getByRole("region", {
+    name: "Inherited tendencies",
+  });
+  expect(within(table).getAllByRole("row")[2].textContent).toContain(
+    "caution5012fresh draw",
+  );
+  expect(screen.getByTestId("inherited-memories").textContent).toBe(
+    "Parent selected m00014, m00012: kept m00014; dropped m00012.",
+  );
+  const memory = screen.getByRole("region", { name: "Active memory" });
+  expect(memory.textContent).toContain("inherited claim");
+  expect(memory.textContent).toContain(
+    "from org-0001 · was outcome m00014 at t7",
+  );
+});

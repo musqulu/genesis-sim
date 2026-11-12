@@ -2,8 +2,15 @@
 
 A birth is the engine's response to a parent's validated `reproduce` proposal; population
 size never causes one. The child is a new, independent organism: fresh id, next generation,
-parent link, its own hidden lifespan, no memories (memory inheritance is M13), no inbox,
-and the parent's cognition policy. It first acts on the next tick.
+parent link, its own hidden lifespan, no inbox, and the parent's cognition policy. It first
+acts on the next tick.
+
+Memory (schema 12): the parent may select up to `inherit_memory_max` of its own active
+records. Each selected record survives independently (`inherit_memory_retention_percent`);
+a survivor becomes the child's own `inherited` record: the text, prefixed "[from <parent>]"
+and truncated to the record limit, at the original place, with its origin (parent, source
+record, kind and tick, first ancestor). It is a claim about the parent's past, never
+refreshed; the parent's records are not changed. The child may receive none.
 
 Tendencies are inherited imperfectly. For each tendency, in TENDENCIES order, a mask draw
 decides whether it is inherited (`inherit_probability_percent`); an inherited value moves by
@@ -13,10 +20,12 @@ birth is reproducible without touching the world's random stream, and every draw
 """
 
 import random
+from dataclasses import replace
 
 from genesis.domain.config import TENDENCIES, TENDENCY_MAX
-from genesis.domain.events import BIRTH_RULE, ORGANISM_BORN, WorldEvent
-from genesis.domain.state import Organism, World
+from genesis.domain.events import BIRTH_RULE, ORGANISM_BORN, MemoryChange, WorldEvent
+from genesis.domain.state import MemoryRecord, Organism, World
+from genesis.engine.memory import truncate
 
 
 def child_id(world: World) -> str:
@@ -55,16 +64,72 @@ def inherit(world: World, parent: Organism, rng: random.Random) -> tuple[tuple |
     return tuple(values), log
 
 
+def inherit_memories(
+    world: World, parent: Organism, new_id: str, selected: tuple[str, ...], rng: random.Random
+) -> tuple[list[MemoryRecord], dict]:
+    """Copies of the selected parent records that survive their retention roll."""
+    life = world.life
+    owned = {m.id: m for m in world.memories_of(parent.id)}
+    kept, rolls = [], []
+    for memory_id in selected:
+        roll = rng.randrange(100)
+        survives = roll < life.inherit_memory_retention_percent
+        rolls.append({"id": memory_id, "roll": roll, "retained": survives})
+        if not survives:
+            continue
+        source = owned[memory_id]
+        ancestor = source.origin["ancestor_id"] if source.kind == "inherited" else parent.id
+        kept.append(
+            MemoryRecord(
+                id=f"{new_id}-m{len(kept) + 1:05d}",
+                owner_id=new_id,
+                kind="inherited",
+                tick=world.tick,
+                age=0,
+                x=source.x,
+                y=source.y,
+                text=truncate(f"[from {parent.id}] {source.text}", life.memory_record_max_bytes),
+                keywords=tuple(sorted({*source.keywords, "inherited"} - {source.kind})),
+                salience=source.salience,
+                origin={
+                    "from": parent.id,
+                    "source_id": source.id,
+                    "source_kind": source.kind,
+                    "source_tick": source.tick,
+                    "ancestor_id": ancestor,
+                },
+            )
+        )
+    log = {
+        "selected": list(selected),
+        "retained": [r["id"] for r in rolls if r["retained"]],
+        "dropped": [r["id"] for r in rolls if not r["retained"]],
+        "rolls": rolls,
+        "copies": [m.id for m in kept],
+    }
+    return kept, log
+
+
 def make_child(
-    world: World, parent: Organism, x: int, y: int, endowment: int, material: int
-) -> tuple[Organism, dict]:
-    """The new organism record plus the observer log of its inheritance draws. Draw order:
-    lifespan, then the tendencies (mask and delta or fresh value, per tendency)."""
+    world: World,
+    parent: Organism,
+    x: int,
+    y: int,
+    endowment: int,
+    material: int,
+    memory_ids: tuple[str, ...] = (),
+) -> tuple[Organism, dict, list[MemoryChange]]:
+    """The new organism record, the observer log of its inheritance draws and the memory
+    deltas for its inherited records. Draw order: lifespan, the tendencies (mask and delta
+    or fresh value, per tendency), then one retention roll per selected record."""
     life = world.life
     new_id = child_id(world)
     rng = birth_rng(world, new_id)
     lifespan = rng.randint(life.lifespan_min, life.lifespan_max)
     tendencies, log = inherit(world, parent, rng)
+    records: list[MemoryRecord] = []
+    if world.schema >= 12:
+        records, log["memories"] = inherit_memories(world, parent, new_id, memory_ids, rng)
     child = Organism(
         id=new_id,
         label=parent.label,
@@ -79,7 +144,8 @@ def make_child(
         carried_material=material,
         tendencies=tendencies,
     )
-    return child, log
+    child = replace(child, memories_written=len(records))
+    return child, log, [MemoryChange("add", r.to_dict()) for r in records]
 
 
 def birth_event(world: World, accepted: WorldEvent) -> WorldEvent:

@@ -1644,3 +1644,7 @@ code {
   color: #c9a6ff;
   font-size: 10px;
 }
+.memory-kind.inherited {
+  border-color: #ffd166;
+  color: #ffe2a0;
+}

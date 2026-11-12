@@ -82,7 +82,7 @@ def test_snapshot_payload_contains_state_rng_scheduler_and_sequence(store):
         "rules": ["env.energy_inflow.v1", "life.upkeep.v1"],
         "deciding": [],  # standard runs have no organisms until cognition exists
     }
-    assert data["schema"] == 11 and data["organisms"] == [] and data["memories"] == []
+    assert data["schema"] == 12 and data["organisms"] == [] and data["memories"] == []
     assert data["messages"] == []
     assert data["life"]["upkeep"] == 1
     assert data["last_sequence"] == seq == 11  # creation + 10 inflow events
@@ -378,15 +378,15 @@ def test_process_killed_around_tick_commit(store, mode, expected_tick):
 
 def test_new_runs_have_sealed_manifest_and_rng_state_in_hash(store):
     loaded = store.load_active()
-    assert loaded.meta.state_schema == 11 and loaded.meta.manifest_version == 3
+    assert loaded.meta.state_schema == 12 and loaded.meta.manifest_version == 3
     with db(store) as conn:
         text, digest, rng = conn.execute(
             "SELECT manifest_json, manifest_hash, initial_rng_state FROM run_manifest"
         ).fetchone()
     data = json.loads(text)
     assert sha256(text) == digest and data["initial_rng_state_sha256"] == sha256(rng)
-    assert data["snapshot_interval"] == 100 and data["state_schema"] == 11
-    assert data["rules_version"] == "m12-rules-1" and data["life"]["seeds"] == []
+    assert data["snapshot_interval"] == 100 and data["state_schema"] == 12
+    assert data["rules_version"] == "m13-rules-1" and data["life"]["seeds"] == []
     assert data["life"]["decision_interval"] == 4 and data["life"]["cognition_fee"] == 1
     assert data["life"]["material_capacity"] == 20
     world = loaded.world

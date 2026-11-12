@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-RULES_VERSION = "m12-rules-1"
+RULES_VERSION = "m13-rules-1"
 # Rules identity hashed into each state schema; old schemas keep their original value so
 # that runs recorded under them still verify.
 RULES_BY_SCHEMA = {
@@ -13,7 +13,8 @@ RULES_BY_SCHEMA = {
     8: "m09-rules-1",
     9: "m10-rules-1",
     10: "m11-rules-1",
-    11: RULES_VERSION,
+    11: "m12-rules-1",
+    12: RULES_VERSION,
 }
 # Lifecycle/material fields introduced with state schema 5 (M05). They are omitted from
 # schema-4 serializations so M04 runs keep byte-identical hashes and stored records.
@@ -67,6 +68,8 @@ M12_LIFE_FIELDS = (
     "inherit_probability_percent",
     "inherit_perturbation",
 )
+# Selective memory inheritance introduced with state schema 12 (M13).
+M13_LIFE_FIELDS = ("inherit_memory_max", "inherit_memory_retention_percent")
 # Bounded reflection introduced with state schema 10 (M11).
 M11_LIFE_FIELDS = (
     "reflection_enabled",
@@ -202,6 +205,10 @@ class LifeConfig:
     reproduction_cooldown: int = 20  # ticks between a parent's births
     inherit_probability_percent: int = 50  # chance each tendency is inherited (mask)
     inherit_perturbation: int = 10  # inherited values move by a uniform -n..+n, clipped
+    # M13 memory inheritance (schema 12): a parent may pass copies of a few of its own
+    # active records; each copy survives independently; the parent pays per started KiB.
+    inherit_memory_max: int = 2  # records a parent may select per birth
+    inherit_memory_retention_percent: int = 50  # chance each selected copy survives
 
     def __post_init__(self) -> None:
         _check_int("energy_capacity", self.energy_capacity, 1, 10_000)
@@ -257,6 +264,10 @@ class LifeConfig:
         _check_int("reproduction_cooldown", self.reproduction_cooldown, 1, 1_000_000)
         _check_int("inherit_probability_percent", self.inherit_probability_percent, 0, 100)
         _check_int("inherit_perturbation", self.inherit_perturbation, 0, TENDENCY_MAX)
+        _check_int("inherit_memory_max", self.inherit_memory_max, 0, 8)
+        _check_int(
+            "inherit_memory_retention_percent", self.inherit_memory_retention_percent, 0, 100
+        )
         if self.tendency_mode not in TENDENCY_MODES:
             raise ValueError("tendency_mode must be 'seeded', 'neutral' or 'off'")
         if not isinstance(self.provider, str) or not (
@@ -275,7 +286,7 @@ class LifeConfig:
         if len({(s.x, s.y) for s in self.seeds}) != len(self.seeds):
             raise ValueError("seed organisms may not share a cell")
 
-    def to_dict(self, schema: int = 11) -> dict:
+    def to_dict(self, schema: int = 12) -> dict:
         data = {
             "energy_capacity": self.energy_capacity,
             "start_energy": self.start_energy,
@@ -300,6 +311,8 @@ class LifeConfig:
             data.update({name: getattr(self, name) for name in M11_LIFE_FIELDS})
         if schema >= 11:
             data.update({name: getattr(self, name) for name in M12_LIFE_FIELDS})
+        if schema >= 12:
+            data.update({name: getattr(self, name) for name in M13_LIFE_FIELDS})
         return data
 
     @classmethod
@@ -537,6 +550,24 @@ FIXTURES: dict[str, Fixture] = {
         "One scripted parent: a birth east (endowment 40), then attempts rejected for "
         "cooldown, a too-small endowment, an occupied cell and too little energy; the child "
         "runs the same script and is too poor to reproduce. No energy inflow",
+    ),
+    # M13: a scripted parent passes copies of selected memories to its child.
+    "birth_memory": Fixture(
+        {},
+        LifeConfig(
+            **_EVERY_TICK,
+            exchange_enabled=False,
+            reflection_enabled=False,
+            start_energy=100,
+            # Labeled: 75% (default 50%) so seed 42 shows one copy kept and one dropped
+            # (retention rolls 74 and 79); other seeds give other outcomes.
+            inherit_memory_retention_percent=75,
+            seeds=(SeedOrganism(12, 12, "memory_parent", (50, 50, 50, 50, 50, 50)),),
+        ),
+        "One scripted parent gathers records for 8 ticks, tries to pass an id it never had "
+        "(invalid_memory) and three ids (over_action_limit), then gives birth passing its "
+        "two newest records: each copy survives with 75% (labeled); the child lives on its own",
+        stockpiles=((12, 12, 20),),
     ),
 }
 

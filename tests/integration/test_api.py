@@ -45,7 +45,7 @@ def test_world_api_contract_and_inspection_match(database):
             assert inspected["state_hash"] == frame["state_hash"]
         assert client.get("/api/world").json() == frame  # reads change nothing
         health = client.get("/api/health").json()
-        assert health["milestone"] == "M12" and health["run_id"] == frame["run_id"]
+        assert health["milestone"] == "M13" and health["run_id"] == frame["run_id"]
 
 
 @pytest.mark.parametrize("path", ["-1/0", "0/-1", "32/0", "0/32", "99999/99999"])
@@ -200,6 +200,7 @@ def test_fixtures_exist_only_in_dev_mode_and_are_labeled(database):
     with TestClient(create_app(database, dev_fixtures=True)) as client:
         assert client.get("/api/world").json()["dev_fixtures"] == [
             "age_limit",
+            "birth_memory",
             "birth_pair",
             "corner_perception",
             "exchange_pair",
@@ -345,4 +346,4 @@ def test_pause_and_shutdown_write_snapshots_and_restart_restores(database):
         reasons = {s["tick"]: s["reason"] for s in client.get("/api/snapshots").json()["snapshots"]}
         assert reasons[last["tick"]] == "close" and reasons[0] == "initial"
         health = client.get("/api/health").json()
-        assert health["milestone"] == "M12" and health["restored_from"]["source"] == "snapshot"
+        assert health["milestone"] == "M13" and health["restored_from"]["source"] == "snapshot"

@@ -197,6 +197,26 @@ REPRODUCER = {
 }
 
 
+def memory_parent(context: dict) -> Proposal:
+    """birth_memory fixture (M13). Ages 1-8: extract energy then material, alternately, to
+    gather records. Age 9: pass an id it never had (invalid_memory). Age 10: three ids
+    (over_action_limit). Age 11: give birth east passing its two newest recalled outcome
+    records. Afterwards it waits. Its child runs the same script from its own memory."""
+    age = context["observation"]["age"]
+    recalled = [m["id"] for m in context.get("recalled") or [] if m["kind"] == "outcome"]
+    me = context["observation"]["organism_id"]
+    if age <= 8:
+        resource = "energy" if age % 2 else "material"
+        return Proposal("extract", resource=resource, amount=2)
+    if age == 9:
+        return Proposal("reproduce", direction="east", endowment=30, memory_ids=[f"{me}-m99999"])
+    if age == 10:
+        return Proposal("reproduce", direction="east", endowment=30, memory_ids=recalled[:3])
+    if age == 11:
+        return Proposal("reproduce", direction="east", endowment=30, memory_ids=recalled[:2])
+    return Proposal("wait")
+
+
 def reproducer(context: dict) -> Proposal:
     """birth_pair fixture: a fixed script by age; its child runs the same script and is
     too poor to reproduce (40 energy < fee 10 + 40 + keep 10). Scripted, not adaptive."""
@@ -210,6 +230,7 @@ REFLECT_POLICIES: dict[str, Callable[[dict], dict]] = {
 }
 
 CONTEXT_POLICIES: dict[str, Callable[[dict], Proposal]] = {
+    "memory_parent": memory_parent,
     "reproducer": reproducer,
     "walk_reflect": walk_square,
     "walk_reflect_invalid": walk_square,

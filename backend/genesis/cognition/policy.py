@@ -70,6 +70,7 @@ class _Reproduce(_Strict):
     direction: Literal["north", "east", "south", "west"]
     endowment: int
     material: int | None = None
+    memory_ids: list[str] | None = Field(default=None, max_length=8)
 
 
 _MODELS = {
@@ -150,5 +151,6 @@ def parse(raw: str, life: LifeConfig, available: tuple[str, ...]) -> ParseResult
         text=getattr(model, "text", None),
         endowment=getattr(model, "endowment", None),
         material=getattr(model, "material", None),
+        memory_ids=getattr(model, "memory_ids", None),
     )
     return ParseResult(proposal, model.explanation, FENCE_NOTE if text is not raw else None)

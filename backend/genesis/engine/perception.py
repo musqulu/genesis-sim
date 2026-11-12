@@ -138,6 +138,14 @@ def _action_rules(world: World) -> tuple[str, ...]:
             f"endowment as its energy; costs a fee of {life.reproduction_fee} plus the "
             f"endowment, you must keep at least {life.reproduction_retain} energy, and at most "
             f"once every {life.reproduction_cooldown} ticks. The new organism lives its own "
-            "life; it starts with some of your tendencies, varied, and none of your memories"
+            "life; it starts with some of your tendencies, varied"
+            + (
+                f". Optional memory_ids (up to {life.inherit_memory_max} of your own memory "
+                f"ids) passes copies of those memories; each copy survives with "
+                f"{life.inherit_memory_retention_percent}% chance; passing costs "
+                f"{life.memory_write_fee_per_kib} energy per started KiB of their text"
+                if world.schema >= 12 and life.memory_enabled
+                else ", and none of your memories"
+            )
         )
     return tuple(rules)

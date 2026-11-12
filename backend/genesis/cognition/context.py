@@ -73,6 +73,18 @@ def action_schema(world: World) -> dict:
                     "maximum": life.energy_capacity,
                 },
                 "material": {"type": "integer", "minimum": 0, "maximum": life.material_capacity},
+                **(
+                    {
+                        "memory_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "maxItems": life.inherit_memory_max,
+                            "description": "ids of your own memories to pass on",
+                        }
+                    }
+                    if world.schema >= 12
+                    else {}
+                ),
                 "explanation": explanation,
             },
             "required": ["action", "direction", "endowment"],

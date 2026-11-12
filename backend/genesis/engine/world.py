@@ -85,7 +85,7 @@ def create_world(config: WorldConfig, life: LifeConfig | None = None) -> World:
             initial_material=sum(c.loose_material for c in cells),
         ),
         rng_state=rng_state_json(rng),
-        schema=11,
+        schema=12,
         life=life,
         organisms=organisms,
     )

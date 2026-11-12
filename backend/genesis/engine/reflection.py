@@ -38,7 +38,7 @@ def new_salient(world: World, organism: Organism) -> int:
     return sum(
         1
         for m in world.memories_of(organism.id)
-        if m.salience >= 2 and m.kind != "reflection" and m.tick > since
+        if m.salience >= 2 and m.kind not in ("reflection", "inherited") and m.tick > since
     )
 
 

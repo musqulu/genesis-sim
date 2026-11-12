@@ -693,6 +693,13 @@ export interface MemoryRecordView {
   salience: number;
   bytes: number;
   evidence?: string[]; // reflections (M11): ids of the records cited
+  origin?: {
+    from: string;
+    source_id: string;
+    source_kind: string;
+    source_tick: number;
+    ancestor_id: string;
+  }; // inherited records (M13)
   added_sequence: number | null;
   forgotten_tick?: number;
   forgotten_sequence?: number;
@@ -730,12 +737,33 @@ export interface OrganismDetail {
   events: EventSummary[];
   action_preview: ActionPreview[];
   memory?: MemoryDetail | null; // state schema 7 runs only
+  inheritance?: BirthRecord | null; // organisms born in the run (M12/M13)
   messages?: MessagesDetail | null; // state schema 8 runs only
   profile?: {
     tendencies: Record<string, number> | null;
     tendency_mode: string;
     stats: BehaviourStats | null;
   } | null; // state schema 9 runs only
+}
+
+/** How a run-born organism came to be: the logged inheritance draws (M12/M13). */
+export interface BirthRecord {
+  event_sequence: number;
+  tick: number;
+  parent_id: string;
+  generation: number;
+  inheritance: {
+    tendencies?: null;
+    mask?: boolean[];
+    parent?: number[];
+    child?: number[];
+    memories?: {
+      selected: string[];
+      retained: string[];
+      dropped: string[];
+      copies: string[];
+    };
+  } | null;
 }
 
 /** Counts derived from recorded events (descriptive; not measures of intent). */

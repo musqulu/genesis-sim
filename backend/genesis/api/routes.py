@@ -342,6 +342,7 @@ def inspect_organism(
             "inbox_capacity": world.life.inbox_capacity,
             "recent": sim.store.message_history(run_id, organism_id, at_tick),
         },
+        inheritance=sim.store.birth_record(run_id, organism_id) if organism.parent_ids else None,
         profile=None
         if world.schema < 9
         else {
@@ -517,7 +518,7 @@ def health(request: Request, sim: Runner) -> dict:
     snapshot = sim.snapshot()
     return {
         "status": "ok",
-        "milestone": "M12",
+        "milestone": "M13",
         "provider": snapshot.provider,
         "pending": snapshot.pending,
         "tick": snapshot.world.tick,

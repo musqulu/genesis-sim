@@ -42,7 +42,7 @@ def test_exchange_pair_is_visible_inspectable_and_survives_restart(database):
     with TestClient(create_app(database, dev_fixtures=True)) as client:
         client.post("/api/runs", json={"seed": 42, "fixture": "exchange_pair"})
         frame = run_until(client, 4)
-        assert frame["schema_version"] == 9 and frame["state_schema"] == 11
+        assert frame["schema_version"] == 9 and frame["state_schema"] == 12
         # Tick 4: the giver's message is drawn on the grid for that tick.
         (line,) = frame["interactions"]
         assert line["kind"] == "communicate" and (line["from_id"], line["to_id"]) == (

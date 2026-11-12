@@ -21,6 +21,7 @@ ENERGY_CATEGORIES = {
     "message_fee": "dissipation",
     "reflection_fee": "dissipation",
     "reproduction_fee": "dissipation",
+    "inheritance_fee": "dissipation",
     "death_retirement": "death_retirement",
 }
 

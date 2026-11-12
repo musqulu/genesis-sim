@@ -55,7 +55,7 @@ def test_birth_events_and_initial_organisms_are_recorded(tmp_path):
     born = events[0]
     assert born["actor_id"] == "org-0001" and born["summary"]["x"] == 0
     assert "lifespan" not in json.dumps(born)  # observer events do not reveal the deadline
-    assert loaded.world.organisms[0].energy == 60 and loaded.meta.state_schema == 11
+    assert loaded.world.organisms[0].energy == 60 and loaded.meta.state_schema == 12
 
 
 def test_replay_reconstructs_organisms_exactly_from_snapshot_or_initial(tmp_path):

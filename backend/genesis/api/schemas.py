@@ -346,6 +346,8 @@ class OrganismDetail(StrictRecord):
     messages: dict | None = None
     # Schema 9: its starting tendencies and behaviour counts from recorded events.
     profile: dict | None = None
+    # M12/M13: for an organism born in the run, its parent and logged inheritance.
+    inheritance: dict | None = None
 
 
 class PopulationEntry(StrictRecord):

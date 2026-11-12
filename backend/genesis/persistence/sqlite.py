@@ -34,7 +34,7 @@ from genesis.persistence.replay import (
 )
 
 SCHEMA_VERSION = 7  # database layout (PRAGMA user_version)
-STATE_SCHEMA = 11  # state/hash schema for newly created runs
+STATE_SCHEMA = 12  # state/hash schema for newly created runs
 MANIFEST_VERSION = 3
 SCHEMA_SQL = (Path(__file__).with_name("schema.sql")).read_text()
 
@@ -1180,6 +1180,19 @@ class SqliteStore:
         for a in stats.values():
             a["cells_visited"] = len(a.pop("cells"))
         return stats
+
+    def birth_record(self, run_id: str, organism_id: str) -> dict | None:
+        """How a run-born organism came to be (M12/M13): parent, tick and the logged
+        inheritance of tendencies and memories. None for seed organisms."""
+        with closing(self._connect()) as db:
+            row = db.execute(
+                "SELECT sequence, tick, summary_json FROM events WHERE run_id = ? "
+                "AND actor_id = ? AND rule_id = 'life.birth.v1'",
+                (run_id, organism_id),
+            ).fetchone()
+        if row is None:
+            return None
+        return {"event_sequence": row[0], "tick": row[1], **json.loads(row[2])}
 
     def interactions_at_tick(self, run_id: str, tick: int) -> list[dict]:
         """Accepted transfers and messages committed at one tick (for the grid overlay)."""

@@ -10,9 +10,10 @@ import json
 from dataclasses import dataclass
 
 SUPPORTED_MANIFESTS = (1, 2, 3)  # 1: M02 run sealed by migration; 2: M03 runs; 3: M04+ runs
-SUPPORTED_STATE_SCHEMAS = tuple(range(2, 12))  # 2: M02; 3: +PRNG; 4: +organisms; 5: +material
+SUPPORTED_STATE_SCHEMAS = tuple(range(2, 13))  # 2: M02; 3: +PRNG; 4: +organisms; 5: +material
 # 6: +cognition scheduling; 7: +costly memory; 8: +local exchange; 9: +tendencies;
-# 10: +reflection; 11: +reproduction
+# 10: +reflection; 11: +reproduction;
+# 12: +memory inheritance
 
 
 def canonical_json(value: object) -> str:

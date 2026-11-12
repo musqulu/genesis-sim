@@ -31,7 +31,7 @@ from genesis.domain.events import (
     WorldEvent,
 )
 from genesis.domain.state import Message, Organism, World
-from genesis.engine import inheritance
+from genesis.engine import inheritance, memory
 
 
 def move_cost(world: World, x: int, y: int) -> int:
@@ -430,8 +430,15 @@ def _reproduce(world: World, organism: Organism, proposal: A.Proposal, payload) 
     endowment, material = proposal.endowment, proposal.material
     if material is None:
         material = 0
+    selected = proposal.memory_ids
+    if selected is None:
+        selected = []
     if (
-        not _only(proposal, "direction", "endowment", "material")
+        not _only(proposal, "direction", "endowment", "material", "memory_ids")
+        or not isinstance(selected, list | tuple)
+        or not all(isinstance(m, str) for m in selected)
+        or len(set(selected)) != len(selected)
+        or (selected and world.schema < 12)
         or not isinstance(proposal.direction, str)
         or proposal.direction not in DIRECTIONS
         or type(endowment) is not int
@@ -443,6 +450,16 @@ def _reproduce(world: World, organism: Organism, proposal: A.Proposal, payload) 
         return _reject(world, organism, proposal, A.ENDOWMENT_TOO_SMALL, payload)
     if endowment > life.energy_capacity or material > life.material_capacity:
         return _reject(world, organism, proposal, A.OVER_CAPACITY, payload)
+    owned = {m.id: m for m in world.memories_of(organism.id)}
+    if len(selected) > life.inherit_memory_max:
+        return _reject(world, organism, proposal, A.OVER_LIMIT, payload)
+    if any(m not in owned for m in selected):  # unknown, another's, or already forgotten
+        return _reject(world, organism, proposal, A.INVALID_MEMORY, payload)
+    transmission = (
+        memory.started_kib(sum(owned[m].size for m in selected)) * life.memory_write_fee_per_kib
+        if selected
+        else 0
+    )
     last = organism.last_reproduced_tick
     if last is not None and world.tick - last < life.reproduction_cooldown:
         return _reject(world, organism, proposal, A.COOLDOWN, payload)
@@ -453,13 +470,20 @@ def _reproduce(world: World, organism: Organism, proposal: A.Proposal, payload) 
     if world.occupant(x, y) is not None:
         return _reject(world, organism, proposal, A.OCCUPIED, payload)
     fee = life.reproduction_fee
-    if organism.energy < fee + endowment + life.reproduction_retain:
+    if organism.energy < fee + transmission + endowment + life.reproduction_retain:
         return _reject(world, organism, proposal, A.INSUFFICIENT_ENERGY, payload)
     if organism.carried_material < material:
         return _reject(world, organism, proposal, A.INSUFFICIENT_SOURCE, payload)
-    child, log = inheritance.make_child(world, organism, x, y, endowment, material)
+    child, log, copies = inheritance.make_child(
+        world, organism, x, y, endowment, material, tuple(selected)
+    )
     changes = [
-        OrganismChange(organism.id, "energy", organism.energy, organism.energy - fee - endowment),
+        OrganismChange(
+            organism.id,
+            "energy",
+            organism.energy,
+            organism.energy - fee - transmission - endowment,
+        ),
         OrganismChange(
             organism.id, "last_reproduced_tick", organism.last_reproduced_tick, world.tick
         ),
@@ -481,7 +505,8 @@ def _reproduce(world: World, organism: Organism, proposal: A.Proposal, payload) 
         "target": child.id,
         "endowment": endowment,
         "material": material,
-        "energy_cost": fee,
+        "energy_cost": fee + transmission,
+        "transmission_fee": transmission,
         "from_x": organism.x,
         "from_y": organism.y,
         "to_x": x,
@@ -490,7 +515,10 @@ def _reproduce(world: World, organism: Organism, proposal: A.Proposal, payload) 
         "inheritance": log,
     }
     ledger = [LedgerEntry("energy", "reproduction_fee", fee)] if fee else []
-    return _accept(world, organism, REPRODUCE_RULE, summary, changes, [], ledger, payload)
+    if transmission:
+        ledger.append(LedgerEntry("energy", "inheritance_fee", transmission))
+    event = _accept(world, organism, REPRODUCE_RULE, summary, changes, [], ledger, payload)
+    return replace(event, memory_changes=tuple(copies))
 
 
 PREVIEW_PROPOSALS = (

@@ -31,6 +31,7 @@ INBOX_FULL = "inbox_full"
 MESSAGE_TOO_LONG = "message_too_long"
 COOLDOWN = "cooldown"  # reproduction: too soon after its last birth
 ENDOWMENT_TOO_SMALL = "endowment_too_small"
+INVALID_MEMORY = "invalid_memory"  # not one of the parent's own active records
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,6 +67,7 @@ class Proposal:
     text: Any = None  # communicate: the message
     endowment: Any = None  # reproduce: energy given to the child
     material: Any = None  # reproduce: optional carried material given to the child
+    memory_ids: Any = None  # reproduce (M13): ids of its own records to pass on
 
     def to_dict(self) -> dict:
         data = {"action": self.action}
@@ -78,6 +80,7 @@ class Proposal:
             "text",
             "endowment",
             "material",
+            "memory_ids",
         ):
             value = getattr(self, name)
             if value is not None:

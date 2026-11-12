@@ -1,6 +1,6 @@
 # Decision register
 
-Version: 0.5, 2026-11-11. This file records requirements and proposals. **The user approved implementation and testing of M01–M12, one milestone at a time (see the planning record).** Local MLX-LM and API-support choices remain user-directed; later milestones await approval. The [constitution](../AGENTS.md) remains unchanged. Detailed mechanisms are in [ARCHITECTURE.md](ARCHITECTURE.md), with delivery gates in [ROADMAP.md](ROADMAP.md).
+Version: 0.5, 2026-11-11. This file records requirements and proposals. **The user approved implementation and testing of M01–M13, one milestone at a time (see the planning record).** Local MLX-LM and API-support choices remain user-directed; later milestones await approval. The [constitution](../AGENTS.md) remains unchanged. Detailed mechanisms are in [ARCHITECTURE.md](ARCHITECTURE.md), with delivery gates in [ROADMAP.md](ROADMAP.md).
 
 ## Status definitions
 
@@ -220,4 +220,16 @@ The `birth_pair` fixture covers the valid and invalid paths. A live trial waits 
 2026-11-11: first live M12 trial (`c366ebba`, 10 local Qwen organisms, 16 × 16, seed 42, seeded tendencies, paused by the user at tick 76). It recorded **two autonomous births** (org-0003 → org-0011 at tick 20; org-0007 → org-0012 at tick 64), both accepted on the first attempt, with logged partial inheritance. These are the first second-generation organisms in the project. 5 starvations; no rules changed.
 
 2026-11-12: the user resumed `c366ebba`; it went extinct at tick 170 with no further births. Notable: the newborn org-0012 messaged its parent org-0007 asking for supplies, and the parent, at 3 energy, gave it 1 material (tick 85, the first transfer in any run) and starved the next tick. Recorded in [M12 validation](validation/M12.md).
+
+2026-11-12: user asked to push and move to M13. Pushed M12 and its live results. Implemented selective memory inheritance: state schema 12 (rules `m13-rules-1`), `reproduce(…, memory_ids)` with at most 2 of the parent's own active ids, a transmission fee per started KiB paid by the parent, independent 50% retention from the per-birth PRNG, and `inherited` child records labelled "[from <parent>]" carrying an origin.
+
+Choices:
+
+- The transmission rate equals the memory write rate.
+- The prefix is part of the stored text.
+- Copies keep the source's place.
+- Inherited records do not trigger reflection.
+- The `birth_memory` fixture uses a labelled 75% retention so seed 42 shows a partial outcome.
+
+A live trial waits for the user. See [M13 validation](validation/M13.md).
 

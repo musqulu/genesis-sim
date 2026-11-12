@@ -157,7 +157,7 @@ def test_behaviour_stats_match_the_exchange_pair_fixture_totals(tmp_path):
 def test_runs_can_be_created_with_neutral_tendencies_and_profiles_are_inspectable(tmp_path):
     with TestClient(create_app(tmp_path / "db.sqlite3", dev_fixtures=True)) as client:
         frame = client.post("/api/runs", json={"seed": 42, "fixture": "tendency_social"}).json()
-        assert frame["state_schema"] == 11
+        assert frame["state_schema"] == 12
         detail = client.get("/api/organisms/org-0001").json()
         assert detail["profile"]["tendencies"]["affiliation"] == 90
         assert detail["profile"]["tendency_mode"] == "seeded"

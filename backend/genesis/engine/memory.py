@@ -68,6 +68,7 @@ class MemoryView:
     salience: int
     size: int
     evidence: tuple[str, ...] = ()  # reflections only: the records it cited
+    origin: dict | None = None  # inherited only: where the copy came from
 
     def to_dict(self) -> dict:
         data = {
@@ -81,6 +82,9 @@ class MemoryView:
         }
         if self.evidence:  # a reflection is shown as an interpretation with its sources
             data["cites"] = list(self.evidence)
+        if self.origin:  # an inherited claim: who passed it on, what it was originally
+            data["inherited_from"] = self.origin["from"]
+            data["originally"] = self.origin["source_kind"]
         return data
 
 
@@ -99,6 +103,7 @@ def views(world: World, organism: Organism) -> tuple[MemoryView, ...]:
             m.salience,
             m.size,
             m.evidence,
+            m.origin,
         )
         for m in world.memories_of(organism.id)
     )
@@ -126,6 +131,12 @@ def rules_text(world: World) -> str:
         f"({life.memory_max_bytes} bytes) are kept; the oldest are forgotten first. "
         "Recalled records give offsets (dx, dy) from where you are now; their values are "
         "as they were then and may have changed."
+        + (
+            " Records marked inherited were passed on by your parent at your birth: claims "
+            "about its past, possibly outdated, not your own experience."
+            if world.schema >= 12
+            else ""
+        )
     )
 
 

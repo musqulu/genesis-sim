@@ -2,6 +2,7 @@ import type { ActionPreview, OrganismDetail, OrganismView } from "../api";
 import MemoryInspector from "./MemoryInspector";
 import MessagesPanel from "./MessagesPanel";
 import ProfilePanel from "./ProfilePanel";
+import InheritancePanel from "./InheritancePanel";
 
 function describeProposal(proposal: ActionPreview["proposal"]): string {
   const { action, ...args } = proposal;
@@ -34,8 +35,16 @@ function describeOutcome(detail: OrganismDetail): string {
     return `Extracted ${s.amount} ${s.resource} (fee ${s.energy_cost})`;
   if (s.action === "modify")
     return `${s.mode === "pack" ? "Packed" : "Unpacked"} ${s.amount} (packed ${s.packed_before}→${s.packed_after}, −${s.energy_cost} energy)`;
-  if (s.action === "reproduce")
-    return `Gave birth to ${s.child_id} (endowment ${s.endowment}, fee ${s.energy_cost})`;
+  if (s.action === "reproduce") {
+    const passed = (
+      s.inheritance as unknown as
+        { memories?: { selected: string[]; retained: string[] } } | undefined
+    )?.memories;
+    const memories = passed?.selected.length
+      ? `; passed ${passed.retained.length} of ${passed.selected.length} memories`
+      : "";
+    return `Gave birth to ${s.child_id} (endowment ${s.endowment}, cost ${s.energy_cost}${memories})`;
+  }
   if (s.action === "reflect")
     return `Reflected: ${s.count} interpretation(s)${s.energy_cost ? ` (−${s.energy_cost} energy)` : ""}`;
   if (s.action === "transfer")
@@ -288,6 +297,13 @@ export default function OrganismPanel({
                 {observation.life_note}”
               </p>
             </>
+          )}
+          {detail.inheritance && (
+            <InheritancePanel
+              birth={detail.inheritance}
+              onSelect={onSelect}
+              onSelectEvent={onSelectEvent}
+            />
           )}
           {detail.profile && <ProfilePanel profile={detail.profile} />}
           {detail.messages && (
